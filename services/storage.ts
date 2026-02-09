@@ -185,5 +185,24 @@ export const storageService = {
       role: 'Guest'
     });
     return storageService.getUsers();
+  },
+
+  // Ranking Lists
+  getRankingLists: async (): Promise<RankingList[]> => {
+    const q = query(collection(db, COLLECTIONS.RANKINGS));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as RankingList));
+  },
+
+  saveRankingLists: async (lists: RankingList[]) => {
+    // Delete all existing rankings
+    const snapshot = await getDocs(collection(db, COLLECTIONS.RANKINGS));
+    for (const docSnapshot of snapshot.docs) {
+      await deleteDoc(doc(db, COLLECTIONS.RANKINGS, docSnapshot.id));
+    }
+    // Add new rankings
+    for (const list of lists) {
+      await setDoc(doc(db, COLLECTIONS.RANKINGS, list.id), list);
+    }
   }
 };
