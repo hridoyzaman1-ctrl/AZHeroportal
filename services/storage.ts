@@ -45,8 +45,9 @@ export const storageService = {
   },
 
   addItem: async (item: VaultItem) => {
-    const docRef = await addDoc(collection(db, COLLECTIONS.VAULT), item);
-    return { ...item, id: docRef.id };
+    // Use setDoc with the item's ID so update/delete work correctly
+    await setDoc(doc(db, COLLECTIONS.VAULT, item.id), item);
+    return item;
   },
 
   updateItem: async (item: VaultItem) => {
