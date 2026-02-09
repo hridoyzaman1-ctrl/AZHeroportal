@@ -58,13 +58,13 @@ const Navigation: React.FC = () => {
     <aside className="hidden md:flex fixed left-0 top-0 h-screen w-64 flex-col border-r border-slate-200 dark:border-white/5 bg-white dark:bg-background-black z-50 p-6 transition-colors duration-500">
       <div className="mb-10">
         <Link to="/" className="text-xl font-black tracking-widest text-slate-900 dark:text-white uppercase flex items-center gap-2 italic group">
-          <span className="text-primary-red material-symbols-outlined text-3xl animate-boltFlash">bolt</span> 
+          <span className="text-primary-red material-symbols-outlined text-3xl animate-boltFlash">bolt</span>
           <span>HERO <span className="text-primary-red">PORTAL</span></span>
         </Link>
       </div>
-      
-      <button 
-        onClick={toggleTheme} 
+
+      <button
+        onClick={toggleTheme}
         className="group mb-8 w-full bg-slate-100 dark:bg-white/5 py-4 rounded-2xl border border-slate-200 dark:border-white/10 text-[10px] font-black uppercase flex items-center justify-between px-4 hover:scale-[1.02] active:scale-95 transition-all shadow-sm hover:shadow-lg dark:hover:shadow-primary-blue/10"
       >
         <span className="text-slate-600 dark:text-gray-400 group-hover:text-primary-blue transition-colors">
@@ -135,12 +135,18 @@ const LayoutWrapper = ({ children }: { children?: React.ReactNode }) => {
 const App: React.FC = () => {
   const [vaultItems, setVaultItems] = useState<VaultItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [settings, setSettings] = useState<SiteSettings>(storageService.getSettings());
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('portal_user');
-    return saved ? JSON.parse(saved) : null;
+  const [settings, setSettings] = useState<SiteSettings>(() => {
+    try { return storageService.getSettings(); } catch { return { siteName: 'Hero Portal', tagline: '', logoUrl: '', socialLinks: [] }; }
   });
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('portal_theme') as any) || 'dark');
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    try {
+      const saved = localStorage.getItem('portal_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
+  });
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    try { return (localStorage.getItem('portal_theme') as any) || 'dark'; } catch { return 'dark'; }
+  });
 
   const refreshItems = () => {
     setVaultItems(storageService.getItems());
@@ -166,7 +172,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <ContentContext.Provider value={{ 
+    <ContentContext.Provider value={{
       vaultItems, categories, settings,
       addItem: (i) => setVaultItems(storageService.addItem(i)),
       updateItem: (i) => setVaultItems(storageService.updateItem(i)),
@@ -175,7 +181,7 @@ const App: React.FC = () => {
       addCategory: (c) => setCategories(storageService.addCategory(c)),
       deleteCategory: (c) => setCategories(storageService.deleteCategory(c)),
       updateSettings: (s) => { storageService.saveSettings(s); setSettings(s); },
-      theme, 
+      theme,
       toggleTheme: () => setTheme(prev => prev === 'dark' ? 'light' : 'dark'),
       currentUser, login, logout
     }}>
