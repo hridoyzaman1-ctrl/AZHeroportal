@@ -7,25 +7,22 @@ const AdminSubscribers: React.FC = () => {
   const [subs, setSubs] = useState<Subscriber[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const loadSubs = () => setSubs(storageService.getSubscribers());
+  const loadSubs = async () => setSubs(await storageService.getSubscribers());
   useEffect(() => { loadSubs(); }, []);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm("Sever this subscriber's link permanently?")) {
-      setSubs(storageService.deleteSubscriber(id));
+      const updated = await storageService.deleteSubscriber(id);
+      setSubs(updated);
     }
   };
 
   const filtered = subs.filter(s => s.email.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
-    <AdminLayout>
+    <AdminLayout title="SIGNAL SUBSCRIBERS" subtitle="Newsletter Nodes">
       <div className="flex-1 flex flex-col min-w-0 bg-[#0a0f1a] h-full">
-        <header className="px-12 py-10 border-b border-white/5 flex justify-between items-center">
-          <div>
-            <span className="text-primary-blue text-[10px] font-black uppercase tracking-[0.4em] mb-1 block">Newsletter Nodes</span>
-            <h1 className="text-3xl font-black italic uppercase tracking-tighter">SIGNAL <span className="text-primary-blue">SUBSCRIBERS</span></h1>
-          </div>
+        <div className="px-12 py-10 border-b border-white/5 flex justify-end">
           <div className="relative w-96">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600">search</span>
             <input
@@ -36,7 +33,7 @@ const AdminSubscribers: React.FC = () => {
               className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-xs font-bold focus:border-primary-blue outline-none transition-all"
             />
           </div>
-        </header>
+        </div>
 
         <div className="p-12 overflow-y-auto no-scrollbar">
           <div className="bg-white/5 border border-white/5 rounded-[3rem] overflow-hidden shadow-2xl">

@@ -147,9 +147,17 @@ const App: React.FC = () => {
   const [vaultItems, setVaultItems] = useState<VaultItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [settings, setSettings] = useState<SiteSettings>({
-    address: '',
-    contactEmail: '',
-    socialLinks: []
+    address: 'Multiverse HQ, Sector 7-G, Prime Reality Tower, New York, NY 10001',
+    showAddress: true,
+    contactEmail: 'uplink@heroportal.io',
+    socialLinks: [
+      { id: 'fb', platform: 'Facebook', url: '', icon: 'facebook', visible: false },
+      { id: 'wa', platform: 'WhatsApp', url: '', icon: 'chat', visible: false },
+      { id: 'yt', platform: 'YouTube', url: '', icon: 'play_circle', visible: false },
+      { id: 'x', platform: 'X', url: '', icon: 'brand_family', visible: false },
+      { id: 'tk', platform: 'TikTok', url: '', icon: 'music_note', visible: false }
+    ],
+    copyrightYear: '2026'
   });
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);

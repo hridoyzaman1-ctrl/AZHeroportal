@@ -80,13 +80,16 @@ export interface RankingList {
 
 export interface SocialLink {
   id: string;
-  platform: string;
+  platform: 'Facebook' | 'WhatsApp' | 'YouTube' | 'X' | 'TikTok' | 'Instagram' | 'Discord';
   url: string;
   icon: string;
+  visible: boolean;
 }
 
 export interface SiteSettings {
   address: string;
+  showAddress: boolean;
   contactEmail: string;
   socialLinks: SocialLink[];
+  copyrightYear: string;
 }

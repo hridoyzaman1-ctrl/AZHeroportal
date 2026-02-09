@@ -122,14 +122,8 @@ const AdminProfile: React.FC = () => {
     if (!currentUser) return null;
 
     return (
-        <AdminLayout>
+        <AdminLayout title="OPERATIVE PROFILE" subtitle="Identity Management">
             <div className="flex-1 flex flex-col min-w-0 bg-[#0a0f1a] overflow-y-auto font-display h-full">
-                <header className="px-12 py-10 border-b border-white/5 flex justify-between items-center bg-[#0a0f1a]/80 backdrop-blur-xl sticky top-0 z-40">
-                    <div>
-                        <span className="text-primary-blue text-[10px] font-black uppercase tracking-[0.4em] mb-1 block">Identity Management</span>
-                        <h1 className="text-3xl font-black italic uppercase tracking-tighter">MY <span className="text-primary-blue">PROFILE</span></h1>
-                    </div>
-                </header>
 
                 <div className="p-12 max-w-5xl mx-auto w-full">
                     {message && (

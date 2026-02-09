@@ -54,27 +54,21 @@ const AdminUsers: React.FC = () => {
   const pendingCount = users.filter(u => !u.isApproved && !u.isRejected && u.isVerified).length;
 
   return (
-    <AdminLayout>
+    <AdminLayout title="SECURITY CLEARANCE" subtitle="Personnel Access Control">
       <div className="flex-1 flex flex-col min-w-0 bg-[#0a0f1a] h-full">
-        <header className="px-12 py-10 border-b border-white/5 flex justify-between items-center bg-[#0a0f1a]/80 backdrop-blur-xl">
-          <div>
-            <span className="text-primary-blue text-[10px] font-black uppercase tracking-[0.4em] mb-1 block">Security Clearance</span>
-            <h1 className="text-3xl font-black italic uppercase tracking-tighter">ACCESS <span className="text-primary-blue">COMMAND</span></h1>
+        <div className="px-12 py-10 border-b border-white/5 flex justify-end items-center gap-6">
+          <div className="flex bg-white/5 p-1 rounded-2xl border border-white/5">
+            <button onClick={() => setActiveTab('ACTIVE')} className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'ACTIVE' ? 'bg-primary-blue text-black' : 'text-gray-500 hover:text-white'}`}>Active</button>
+            <button onClick={() => setActiveTab('PENDING')} className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'PENDING' ? 'bg-yellow-500 text-black' : 'text-gray-500 hover:text-white'}`}>
+              Requests
+              {pendingCount > 0 && <span className="absolute -top-1 -right-1 size-5 bg-primary-red text-white text-[8px] flex items-center justify-center rounded-full animate-bounce">{pendingCount}</span>}
+            </button>
           </div>
-          <div className="flex items-center gap-6">
-            <div className="flex bg-white/5 p-1 rounded-2xl border border-white/5">
-              <button onClick={() => setActiveTab('ACTIVE')} className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'ACTIVE' ? 'bg-primary-blue text-black' : 'text-gray-500 hover:text-white'}`}>Active</button>
-              <button onClick={() => setActiveTab('PENDING')} className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'PENDING' ? 'bg-yellow-500 text-black' : 'text-gray-500 hover:text-white'}`}>
-                Requests
-                {pendingCount > 0 && <span className="absolute -top-1 -right-1 size-5 bg-primary-red text-white text-[8px] flex items-center justify-center rounded-full animate-bounce">{pendingCount}</span>}
-              </button>
-            </div>
-            <div className="relative w-64">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-sm">person_search</span>
-              <input type="text" placeholder="Locate signal..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-xs font-bold focus:border-primary-blue outline-none" />
-            </div>
+          <div className="relative w-64">
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-sm">person_search</span>
+            <input type="text" placeholder="Locate signal..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-xs font-bold focus:border-primary-blue outline-none" />
           </div>
-        </header>
+        </div>
 
         <div className="p-12 overflow-y-auto no-scrollbar">
           <div className="bg-white/5 border border-white/5 rounded-[3rem] overflow-hidden shadow-2xl">

@@ -69,22 +69,22 @@ const AdminRankings: React.FC = () => {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout title="RANKING COMMAND" subtitle="Epic Content Curation">
       <div className="flex flex-col bg-[#0a0f1a] h-full overflow-hidden">
-        <header className="px-12 py-10 border-b border-white/5 flex justify-between items-center bg-[#0a0f1a]/80 backdrop-blur-xl">
-          <div>
-            <span className="text-primary-blue text-[10px] font-black uppercase tracking-[0.4em] mb-1 block">Epic Curation</span>
-            <h1 className="text-3xl font-black italic uppercase tracking-tighter">RANKING <span className="text-primary-blue">COMMAND</span></h1>
+        <div className="flex-1 p-12 space-y-12 overflow-y-auto no-scrollbar">
+          <div className="flex justify-between items-end">
+            <div>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Operational Data</p>
+              <h2 className="text-xl font-black italic uppercase tracking-tighter">{lists.length} ACTIVE <span className="text-primary-blue">SEQUENCES</span></h2>
+            </div>
+            <button
+              onClick={() => setEditingList({ title: '', items: [], type: 'Best', description: '' })}
+              className="px-8 py-4 bg-primary-blue text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl hover:scale-105 transition-all shadow-[0_0_30px_rgba(0,242,255,0.2)]"
+            >
+              Initiate New Rank Sequence
+            </button>
           </div>
-          <button
-            onClick={() => setEditingList({ title: '', items: [], type: 'Best', description: '' })}
-            className="px-8 py-3 bg-primary-blue text-black rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition-all"
-          >
-            Create List
-          </button>
-        </header>
 
-        <div className="flex-1 overflow-y-auto p-12 space-y-8 no-scrollbar">
           {editingList ? (
             <div className="max-w-4xl mx-auto bg-white/5 border border-white/10 rounded-[3rem] p-12 space-y-10 animate-fadeIn">
               <div className="flex justify-between items-center">
@@ -158,8 +158,8 @@ const AdminRankings: React.FC = () => {
                           onClick={() => addItemToList(v.id)}
                           disabled={editingList.items?.some(it => it.vaultItemId === v.id)}
                           className={`w-full text-left p-4 rounded-xl text-[10px] font-bold truncate uppercase transition-all ${editingList.items?.some(it => it.vaultItemId === v.id)
-                              ? 'bg-white/5 opacity-30 cursor-not-allowed'
-                              : 'bg-white/5 hover:bg-primary-blue/10 hover:text-primary-blue'
+                            ? 'bg-white/5 opacity-30 cursor-not-allowed'
+                            : 'bg-white/5 hover:bg-primary-blue/10 hover:text-primary-blue'
                             }`}
                         >
                           {v.title}

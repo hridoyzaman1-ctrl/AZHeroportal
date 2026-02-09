@@ -16,22 +16,15 @@ const NewsDetail: React.FC = () => {
   const { id } = useParams();
   const { vaultItems, updateItem, theme } = useContent();
   const navigate = useNavigate();
-  const [summary, setSummary] = useState<string>('Analyzing multiversal data...');
+  const news = vaultItems.find(item => item.id === id);
   const [commentText, setCommentText] = useState('');
   const [authorName, setAuthorName] = useState('');
   const [authorEmail, setAuthorEmail] = useState('');
   const [userScore, setUserScore] = useState<number>(10);
   const [shareSuccess, setShareSuccess] = useState(false);
 
-  const news = vaultItems.find(item => item.id === id);
-
   useEffect(() => {
     if (!news) return;
-    const fetchSummary = async () => {
-      const res = await geminiService.generateSummary(news.content);
-      setSummary(res || 'Decryption complete.');
-    };
-    fetchSummary();
     window.scrollTo(0, 0);
     const timer = setTimeout(() => {
       updateItem({ ...news, views: (news.views || 0) + 1 });
@@ -165,15 +158,7 @@ const NewsDetail: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             <div className="lg:col-span-8 space-y-12">
-              <div className="p-8 bg-primary-blue/5 border border-primary-blue/20 rounded-[2.5rem] relative overflow-hidden group shadow-xl">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="material-symbols-outlined text-primary-blue text-lg">psychology</span>
-                  <span className="text-[10px] font-black text-primary-blue uppercase tracking-[0.4em]">AI Intel Summary</span>
-                </div>
-                <p className="text-lg text-slate-700 dark:text-gray-200 italic leading-relaxed font-medium">"{summary}"</p>
-              </div>
-
-              {/* TACTICAL BRIEFING: SEAMLESS INLINE VIDEO PLAYER */}
+              {/* TACTICAL BRIEFING: VIDEO PLAYER */}
               {news.videoUrl && (
                 <section className="space-y-6 animate-fadeIn">
                   <div className="flex items-center justify-between">
@@ -199,8 +184,16 @@ const NewsDetail: React.FC = () => {
                 </section>
               )}
 
-              <article className={`prose dark:prose-invert prose-xl max-w-none leading-relaxed font-medium tracking-tight ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
-                {news.content.split('\n\n').map((para, i) => <p key={i} className="mb-8">{para}</p>)}
+              <article className={`max-w-4xl prose prose-slate dark:prose-invert transition-colors duration-500`}>
+                {news.content.split('\n\n').map((paragraph, idx) => (
+                  <p
+                    key={idx}
+                    className={`text-xl font-medium leading-[1.85] tracking-tight mb-10 selection:bg-primary-red selection:text-white ${theme === 'dark' ? 'text-gray-300' : 'text-slate-700'
+                      }`}
+                  >
+                    {paragraph}
+                  </p>
+                ))}
               </article>
 
               <section className="pt-20 border-t border-white/5 space-y-12">
@@ -222,12 +215,12 @@ const NewsDetail: React.FC = () => {
                   <form onSubmit={handleComment} className="space-y-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-3">
-                        <label className={`text-[10px] font-black uppercase tracking-widest ml-2 ${theme === 'dark' ? 'text-gray-500' : 'text-slate-400'}`}>Display Identity (Name)*</label>
+                        <label className={`text-[10px] font-black uppercase tracking-widest ml-2 ${theme === 'dark' ? 'text-gray-500' : 'text-slate-400'}`}>Identity (Name)*</label>
                         <input required type="text" value={authorName} onChange={e => setAuthorName(e.target.value)} placeholder="Nexus ID..." className={`w-full border rounded-2xl p-5 text-sm font-bold outline-none focus:border-primary-blue transition-all ${theme === 'dark' ? 'bg-black/40 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`} />
                       </div>
                       <div className="space-y-3">
-                        <label className={`text-[10px] font-black uppercase tracking-widest ml-2 ${theme === 'dark' ? 'text-gray-500' : 'text-slate-400'}`}>Uplink Frequency (Email - Optional)</label>
-                        <input type="email" value={authorEmail} onChange={e => setAuthorEmail(e.target.value)} placeholder="email@multiverse.com" className={`w-full border rounded-2xl p-5 text-sm font-bold outline-none focus:border-primary-blue transition-all ${theme === 'dark' ? 'bg-black/40 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`} />
+                        <label className={`text-[10px] font-black uppercase tracking-widest ml-2 ${theme === 'dark' ? 'text-gray-500' : 'text-slate-400'}`}>Uplink (Email - Optional)</label>
+                        <input type="email" value={authorEmail} onChange={e => setAuthorEmail(e.target.value)} placeholder="email@multiverse.com (Optional)" className={`w-full border rounded-2xl p-5 text-sm font-bold outline-none focus:border-primary-blue transition-all ${theme === 'dark' ? 'bg-black/40 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`} />
                       </div>
                     </div>
 
@@ -236,7 +229,7 @@ const NewsDetail: React.FC = () => {
                         <label className={`text-[10px] font-black uppercase tracking-widest ${theme === 'dark' ? 'text-gray-500' : 'text-slate-400'}`}>Multiversal Rating</label>
                         <span className="text-2xl font-black text-primary-blue italic">{userScore}/10</span>
                       </div>
-                      <input type="range" min="1" max="10" step="1" value={userScore} onChange={e => setUserScore(parseInt(e.target.value))} className="w-full accent-primary-blue bg-white/5 h-2 rounded-full appearance-none cursor-pointer" />
+                      <input type="range" min="1" max="10" step="1" value={userScore} onChange={e => setUserScore(parseInt(e.target.value))} className={`w-full accent-primary-blue h-2 rounded-full appearance-none cursor-pointer ${theme === 'dark' ? 'bg-white/10' : 'bg-slate-200'}`} />
                     </div>
 
                     <div className="space-y-3">

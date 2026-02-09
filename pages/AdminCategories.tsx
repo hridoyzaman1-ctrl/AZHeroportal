@@ -16,14 +16,8 @@ const AdminCategories: React.FC = () => {
   };
 
   return (
-    <AdminLayout>
+    <AdminLayout title="GRID SECTORS" subtitle="Category Matrix Matrix">
       <div className="flex-1 flex flex-col min-w-0 bg-[#0a0f1a] h-full">
-        <header className="px-12 py-10 border-b border-white/5 flex justify-between items-center">
-          <div>
-            <span className="text-primary-blue text-[10px] font-black uppercase tracking-[0.4em] mb-1 block">Sector Definition</span>
-            <h1 className="text-3xl font-black italic uppercase tracking-tighter">CATEGORY <span className="text-primary-blue">MATRIX</span></h1>
-          </div>
-        </header>
 
         <div className="p-12 space-y-12 overflow-y-auto no-scrollbar">
           <div className="max-w-xl mx-auto space-y-10">

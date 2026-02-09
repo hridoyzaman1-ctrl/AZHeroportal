@@ -11,10 +11,10 @@ const Footer: React.FC = () => {
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) { 
+    if (email) {
       storageService.addSubscriber(email);
-      setSubscribed(true); 
-      setEmail(''); 
+      setSubscribed(true);
+      setEmail('');
     }
   };
 
@@ -24,16 +24,36 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-20">
           <div className="lg:col-span-4">
             <Link to="/" className="text-2xl font-black tracking-tighter text-white uppercase flex items-center gap-3 italic mb-8 group">
-              <span className="text-primary-red material-symbols-outlined text-4xl group-hover:rotate-12 transition-transform">bolt</span> 
+              <span className="text-primary-red material-symbols-outlined text-4xl group-hover:rotate-12 transition-transform">bolt</span>
               <span>HERO <span className="text-primary-red">PORTAL</span></span>
             </Link>
-            <p className="text-gray-500 text-sm leading-relaxed mb-6 max-w-sm">{settings.address}</p>
-            <div className="flex gap-4">
-              {settings.socialLinks.map(link => (
-                <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="size-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:bg-primary-red hover:text-white transition-all" title={link.platform}>
-                  <span className="material-symbols-outlined text-sm">{link.icon || 'link'}</span>
-                </a>
-              ))}
+            {settings.showAddress && settings.address && (
+              <p className="text-gray-500 text-sm leading-relaxed mb-8 max-w-sm">{settings.address}</p>
+            )}
+            <div className="flex flex-wrap gap-4">
+              {settings.socialLinks.filter(l => l.visible).map(link => {
+                let icon = 'link';
+                if (link.platform === 'Facebook') icon = 'facebook';
+                if (link.platform === 'YouTube') icon = 'play_circle';
+                if (link.platform === 'X') icon = 'brand_family';
+                if (link.platform === 'WhatsApp') icon = 'chat';
+                if (link.platform === 'TikTok') icon = 'music_note';
+
+                return (
+                  <a
+                    key={link.id}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="size-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:bg-primary-red hover:text-white hover:scale-110 active:scale-95 transition-all"
+                    title={link.platform}
+                  >
+                    <span className="material-symbols-outlined text-base">
+                      {icon}
+                    </span>
+                  </a>
+                );
+              })}
             </div>
           </div>
 
@@ -66,6 +86,16 @@ const Footer: React.FC = () => {
                 <p className="text-primary-blue font-black uppercase text-xs tracking-widest text-center">Uplink Established</p>
               )}
             </div>
+          </div>
+        </div>
+
+        <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600">
+            © {settings.copyrightYear} <span className="text-primary-red">HERO PORTAL</span>. ALL RIGHTS COMMITTED TO THE GRID.
+          </p>
+          <div className="flex gap-8">
+            <Link to="/about" className="text-[9px] font-bold text-gray-600 hover:text-white uppercase tracking-widest transition-colors">Origins</Link>
+            <Link to="/privacy" className="text-[9px] font-bold text-gray-600 hover:text-white uppercase tracking-widest transition-colors">Privacy Protocols</Link>
           </div>
         </div>
       </div>

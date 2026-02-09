@@ -40,13 +40,9 @@ const AdminComments: React.FC = () => {
   };
 
   return (
-    <AdminLayout>
+    <AdminLayout title="REVIEW CONTROL" subtitle="Reader Intel Moderation">
       <div className="flex-1 flex flex-col min-w-0 bg-[#0a0f1a] h-full">
-        <header className="px-12 py-10 border-b border-white/5 flex justify-between items-center">
-          <div>
-            <span className="text-primary-blue text-[10px] font-black uppercase tracking-[0.4em] mb-1 block">Reader Intel Moderation</span>
-            <h1 className="text-3xl font-black italic uppercase tracking-tighter">REVIEW <span className="text-primary-blue">CONTROL</span></h1>
-          </div>
+        <div className="px-12 py-10 border-b border-white/5 flex justify-end">
           <div className="relative w-96">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600">search</span>
             <input
@@ -57,7 +53,7 @@ const AdminComments: React.FC = () => {
               className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-xs font-bold focus:border-primary-blue outline-none transition-all"
             />
           </div>
-        </header>
+        </div>
 
         <div className="flex-1 overflow-y-auto p-12 space-y-8 no-scrollbar">
           {filtered.length > 0 ? (

@@ -98,13 +98,16 @@ export const storageService = {
     }
     return {
       address: 'Multiverse HQ, Sector 7-G, Prime Reality Tower, New York, NY 10001',
+      showAddress: true,
       contactEmail: 'uplink@heroportal.io',
       socialLinks: [
-        { id: '1', platform: 'X', url: 'https://x.com/heroportal', icon: 'brand_family' },
-        { id: '2', platform: 'YouTube', url: 'https://youtube.com/heroportal', icon: 'play_circle' },
-        { id: '3', platform: 'Instagram', url: 'https://instagram.com/heroportal', icon: 'photo_camera' },
-        { id: '4', platform: 'Discord', url: 'https://discord.gg/heroportal', icon: 'forum' }
-      ]
+        { id: 'fb', platform: 'Facebook', url: 'https://facebook.com/heroportal', icon: 'facebook', visible: true },
+        { id: 'wa', platform: 'WhatsApp', url: 'https://wa.me/heroportal', icon: 'chat', visible: true },
+        { id: 'yt', platform: 'YouTube', url: 'https://youtube.com/heroportal', icon: 'play_circle', visible: true },
+        { id: 'x', platform: 'X', url: 'https://x.com/heroportal', icon: 'brand_family', visible: true },
+        { id: 'tk', platform: 'TikTok', url: 'https://tiktok.com/@heroportal', icon: 'music_note', visible: true }
+      ],
+      copyrightYear: '2026'
     };
   },
 

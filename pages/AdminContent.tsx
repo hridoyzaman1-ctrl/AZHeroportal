@@ -4,7 +4,6 @@ import { useState, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useContent } from '../App';
 import { VaultItem, ContentType } from '../types';
-import { geminiService } from '../services/gemini';
 
 const getYouTubeId = (url: string) => {
   if (!url) return null;
@@ -21,7 +20,6 @@ import AdminLayout from '../components/AdminLayout';
 const AdminContent: React.FC = () => {
   const { vaultItems, addItem, updateItem, deleteItem, categories } = useContent();
   const [showModal, setShowModal] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All Sectors');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -152,13 +150,6 @@ const AdminContent: React.FC = () => {
     isMarvelTrending: false, isDCTrending: false
   });
 
-  const handleAIGenerate = async () => {
-    if (!formData.title) return;
-    setIsGenerating(true);
-    const result = await geminiService.generateSummary(formData.title);
-    setFormData(prev => ({ ...prev, content: result }));
-    setIsGenerating(false);
-  };
 
   const getSortIndicator = (key: SortKey) => {
     if (sortConfig.key !== key) return <span className="material-symbols-outlined text-[10px] opacity-20">sort</span>;
@@ -168,15 +159,26 @@ const AdminContent: React.FC = () => {
   const ytId = getYouTubeId(formData.videoUrl || '');
 
   return (
-    <AdminLayout>
+    <AdminLayout title="THE VAULT" subtitle="Intelligence Storage">
       <div className="flex-1 flex flex-col bg-[#0a0f1a] overflow-hidden h-full">
-        <header className="px-12 py-10 border-b border-white/5 flex justify-between items-center bg-[#0a0f1a]/80 backdrop-blur-xl sticky top-0 z-40 shadow-2xl">
-          <div><span className="text-primary-blue text-[10px] font-black uppercase tracking-[0.4em] mb-1 block">Signal Storage</span><h1 className="text-3xl font-black italic uppercase tracking-tighter">THE <span className="text-primary-blue">VAULT</span></h1></div>
-          <div className="flex items-center gap-6">
-            <div className="relative w-64"><span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-sm">search</span><input type="text" placeholder="Filter signals..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-xs font-bold focus:border-primary-blue outline-none transition-all" /></div>
-            <button onClick={() => handleOpenModal()} className="px-8 py-3 bg-primary-blue text-black rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition-all">Inject Intel</button>
+        <div className="px-12 py-10 border-b border-white/5 flex justify-end gap-6 items-center">
+          <div className="relative w-64">
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-sm">search</span>
+            <input
+              type="text"
+              placeholder="Filter signals..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-black/50 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-xs font-bold focus:border-primary-blue outline-none transition-all"
+            />
           </div>
-        </header>
+          <button
+            onClick={() => handleOpenModal()}
+            className="px-8 py-3 bg-primary-blue text-black rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition-all"
+          >
+            Inject Intel
+          </button>
+        </div>
 
         <div className="flex-1 overflow-y-auto p-12 space-y-8 no-scrollbar">
           <div className="bg-white/5 border border-white/5 rounded-[4rem] overflow-hidden shadow-2xl">
@@ -266,9 +268,6 @@ const AdminContent: React.FC = () => {
 
                   <div className="flex justify-between items-center px-4">
                     <label className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600">Intelligence Body</label>
-                    <button onClick={handleAIGenerate} disabled={isGenerating || !formData.title} className="text-[10px] font-black uppercase text-primary-blue flex items-center gap-2 hover:glow-blue transition-all disabled:opacity-30">
-                      <span className={`material-symbols-outlined text-sm ${isGenerating ? 'animate-spin' : ''}`}>auto_awesome</span> Neural Sync
-                    </button>
                   </div>
                   <textarea value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} rows={12} className="w-full bg-black/60 border border-white/10 rounded-[3rem] p-10 text-base text-white outline-none focus:border-primary-blue resize-none leading-relaxed" placeholder="Detailed mission briefing..."></textarea>
                 </div>
