@@ -16,6 +16,8 @@ const getYouTubeId = (url: string) => {
 type SortKey = 'title' | 'date' | 'views' | 'type' | 'categories';
 type SortOrder = 'asc' | 'desc';
 
+import AdminLayout from '../components/AdminLayout';
+
 const AdminContent: React.FC = () => {
   const { vaultItems, addItem, updateItem, deleteItem, categories } = useContent();
   const [showModal, setShowModal] = useState(false);
@@ -166,22 +168,8 @@ const AdminContent: React.FC = () => {
   const ytId = getYouTubeId(formData.videoUrl || '');
 
   return (
-    <div className="flex h-screen bg-[#050505] text-white overflow-hidden">
-      <aside className="w-72 bg-[#0c0c0c] border-r border-white/5 flex flex-col shrink-0">
-        <div className="p-10 border-b border-white/5">
-          <Link to="/" className="text-2xl font-black italic tracking-tighter text-primary-red flex items-center gap-3">
-            <span className="material-symbols-outlined text-3xl animate-boltFlash">bolt</span> COMMAND
-          </Link>
-        </div>
-        <nav className="flex-1 p-8 space-y-4">
-          <Link to="/admin" className="flex items-center gap-5 p-5 rounded-2xl text-gray-500 hover:text-white hover:bg-white/5 transition-all"><span className="material-symbols-outlined">grid_view</span><span className="font-bold text-[11px] uppercase tracking-widest">Dashboard</span></Link>
-          <Link to="/admin/content" className="flex items-center gap-5 p-5 rounded-2xl bg-primary-blue/10 text-primary-blue border border-primary-blue/20 transition-all"><span className="material-symbols-outlined">inventory_2</span><span className="font-bold text-[11px] uppercase tracking-widest">Vault Content</span></Link>
-          <Link to="/admin/rankings" className="flex items-center gap-5 p-5 rounded-2xl text-gray-500 hover:text-white hover:bg-white/5 transition-all"><span className="material-symbols-outlined">trophy</span><span className="font-bold text-[11px] uppercase tracking-widest">Rankings</span></Link>
-          <Link to="/admin/settings" className="flex items-center gap-5 p-5 rounded-2xl text-gray-500 hover:text-white hover:bg-white/5 transition-all"><span className="material-symbols-outlined">settings</span><span className="font-bold text-[11px] uppercase tracking-widest">Settings</span></Link>
-        </nav>
-      </aside>
-
-      <main className="flex-1 flex flex-col bg-[#0a0f1a] overflow-hidden">
+    <AdminLayout>
+      <div className="flex-1 flex flex-col bg-[#0a0f1a] overflow-hidden h-full">
         <header className="px-12 py-10 border-b border-white/5 flex justify-between items-center bg-[#0a0f1a]/80 backdrop-blur-xl sticky top-0 z-40 shadow-2xl">
           <div><span className="text-primary-blue text-[10px] font-black uppercase tracking-[0.4em] mb-1 block">Signal Storage</span><h1 className="text-3xl font-black italic uppercase tracking-tighter">THE <span className="text-primary-blue">VAULT</span></h1></div>
           <div className="flex items-center gap-6">
@@ -250,7 +238,7 @@ const AdminContent: React.FC = () => {
             </table>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* MODAL */}
       {showModal && (
@@ -437,7 +425,7 @@ const AdminContent: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 };
 

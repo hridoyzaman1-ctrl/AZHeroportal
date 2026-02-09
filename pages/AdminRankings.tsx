@@ -1,6 +1,4 @@
-
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useContent } from '../App';
 import { storageService } from '../services/storage';
 import { RankingList } from '../types';
@@ -10,24 +8,32 @@ const AdminRankings: React.FC = () => {
   const { vaultItems } = useContent();
   const [lists, setLists] = useState<RankingList[]>([]);
   const [editingList, setEditingList] = useState<Partial<RankingList> | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadLists = async () => {
-      const data = await storageService.getRankingLists();
-      setLists(data);
+      try {
+        const data = await storageService.getRankingLists();
+        setLists(data || []);
+      } catch (error) {
+        console.error("Error loading rankings:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     loadLists();
   }, []);
 
   const handleSave = async () => {
     if (!editingList?.title) return;
-    const newList = {
+
+    const newList: RankingList = {
       id: editingList.id || Date.now().toString(),
       title: editingList.title,
       description: editingList.description || '',
       type: editingList.type || 'Best',
       items: editingList.items || []
-    } as RankingList;
+    };
 
     const updated = editingList.id
       ? lists.map(l => l.id === newList.id ? newList : l)
@@ -42,12 +48,25 @@ const AdminRankings: React.FC = () => {
     if (!editingList) return;
     const currentItems = editingList.items || [];
     if (currentItems.length >= 10) return alert("Rank quota reached (10 max)");
+
+    // Don't add if already in list
+    if (currentItems.some(it => it.vaultItemId === itemId)) return;
+
     setEditingList({
       ...editingList,
       items: [...currentItems, { vaultItemId: itemId, rank: currentItems.length + 1 }]
     });
   };
 
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center h-full bg-[#0a0f1a]">
+          <div className="text-primary-blue animate-pulse font-black uppercase tracking-[0.5em]">Syncing Rankings...</div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -57,60 +76,154 @@ const AdminRankings: React.FC = () => {
             <span className="text-primary-blue text-[10px] font-black uppercase tracking-[0.4em] mb-1 block">Epic Curation</span>
             <h1 className="text-3xl font-black italic uppercase tracking-tighter">RANKING <span className="text-primary-blue">COMMAND</span></h1>
           </div>
-          <button onClick={() => setEditingList({ title: '', items: [] })} className="px-8 py-3 bg-primary-blue text-black rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg">Create List</button>
+          <button
+            onClick={() => setEditingList({ title: '', items: [], type: 'Best', description: '' })}
+            className="px-8 py-3 bg-primary-blue text-black rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition-all"
+          >
+            Create List
+          </button>
         </header>
 
         <div className="flex-1 overflow-y-auto p-12 space-y-8 no-scrollbar">
           {editingList ? (
-            <div className="max-w-4xl mx-auto bg-surface-dark border border-white/10 rounded-[3rem] p-12 space-y-10 animate-fadeIn">
-              <h2 className="text-2xl font-black uppercase italic tracking-tighter">Edit Neural Ranking</h2>
+            <div className="max-w-4xl mx-auto bg-white/5 border border-white/10 rounded-[3rem] p-12 space-y-10 animate-fadeIn">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-black uppercase italic tracking-tighter">Edit Neural Ranking</h2>
+                <span className="text-[10px] font-black uppercase text-primary-blue tracking-widest">Buffer Status: Active</span>
+              </div>
+
               <div className="grid grid-cols-2 gap-8">
-                <input type="text" placeholder="LIST TITLE" value={editingList.title} onChange={e => setEditingList({ ...editingList, title: e.target.value })} className="w-full bg-black border border-white/10 rounded-2xl p-4 text-xs font-black uppercase text-white outline-none focus:border-primary-blue" />
-                <select value={editingList.type} onChange={e => setEditingList({ ...editingList, type: e.target.value as any })} className="bg-black border border-white/10 rounded-2xl p-4 text-xs font-black uppercase text-white outline-none">
-                  <option value="Best">Best Of</option>
-                  <option value="Worst">Worst Of</option>
-                  <option value="Trending">Trending Hub</option>
-                </select>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-gray-500 tracking-widest px-2">List Title</label>
+                  <input
+                    type="text"
+                    placeholder="LIST TITLE"
+                    value={editingList.title}
+                    onChange={e => setEditingList({ ...editingList, title: e.target.value })}
+                    className="w-full bg-black border border-white/10 rounded-2xl p-4 text-xs font-black uppercase text-white outline-none focus:border-primary-blue transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-gray-500 tracking-widest px-2">Curation Bias</label>
+                  <select
+                    value={editingList.type}
+                    onChange={e => setEditingList({ ...editingList, type: e.target.value as any })}
+                    className="w-full bg-black border border-white/10 rounded-2xl p-4 text-xs font-black uppercase text-white outline-none focus:border-primary-blue appearance-none"
+                  >
+                    <option value="Best">Best Of</option>
+                    <option value="Worst">Worst Of</option>
+                    <option value="Trending">Trending Hub</option>
+                  </select>
+                </div>
               </div>
 
               <div className="space-y-6">
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500">Signal Assignments</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500 px-2">Signal Assignments</h3>
                 <div className="grid grid-cols-1 gap-3">
-                  {editingList.items?.map((item, i) => (
-                    <div key={i} className="flex justify-between items-center p-4 bg-black/40 rounded-2xl border border-white/5">
-                      <span className="text-primary-blue font-black italic">#{item.rank}</span>
-                      <span className="text-xs font-bold truncate max-w-xs">{vaultItems.find(v => v.id === item.vaultItemId)?.title}</span>
-                      <button onClick={() => setEditingList({ ...editingList, items: editingList.items?.filter((_, idx) => idx !== i).map((it, ni) => ({ ...it, rank: ni + 1 })) })} className="text-primary-red material-symbols-outlined">delete</button>
+                  {(editingList.items || []).map((item, i) => (
+                    <div key={i} className="flex justify-between items-center p-4 bg-black/40 rounded-2xl border border-white/5 group hover:border-primary-blue/30 transition-all">
+                      <div className="flex items-center gap-6">
+                        <span className="text-primary-blue font-black italic text-lg w-8">#{item.rank}</span>
+                        <span className="text-xs font-bold truncate max-w-xs text-white/90">
+                          {vaultItems.find(v => v.id === item.vaultItemId)?.title || 'UNKNOWN SIGNAL'}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => setEditingList({
+                          ...editingList,
+                          items: editingList.items?.filter((_, idx) => idx !== i).map((it, ni) => ({ ...it, rank: ni + 1 }))
+                        })}
+                        className="text-gray-600 hover:text-primary-red material-symbols-outlined transition-colors"
+                      >
+                        delete
+                      </button>
                     </div>
                   ))}
-                  {editingList.items?.length === 0 && <p className="text-center py-6 text-gray-700 text-xs italic uppercase tracking-widest">No signals linked to this rank</p>}
+                  {(editingList.items || []).length === 0 && (
+                    <div className="p-12 border border-dashed border-white/10 rounded-3xl text-center text-gray-700 text-xs italic uppercase tracking-[0.3em]">
+                      No signals linked to this rank
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-8 pt-6">
+              <div className="grid grid-cols-2 gap-12 pt-10 border-t border-white/5">
                 <div className="space-y-4">
-                  <h4 className="text-[10px] font-black uppercase text-gray-500">Inject Signals</h4>
-                  <div className="h-64 overflow-y-auto space-y-2 no-scrollbar pr-2">
-                    {vaultItems.filter(v => v.status === 'Published').map(v => (
-                      <button key={v.id} onClick={() => addItemToList(v.id)} className="w-full text-left p-3 bg-white/5 rounded-xl hover:bg-white/10 text-[10px] font-bold truncate uppercase">{v.title}</button>
-                    ))}
+                  <h4 className="text-[10px] font-black uppercase text-gray-500 tracking-widest px-2">Inject Signals</h4>
+                  <div className="h-72 overflow-y-auto space-y-2 no-scrollbar pr-4">
+                    {vaultItems.length > 0 ? (
+                      vaultItems.filter(v => v.status === 'Published').map(v => (
+                        <button
+                          key={v.id}
+                          onClick={() => addItemToList(v.id)}
+                          disabled={editingList.items?.some(it => it.vaultItemId === v.id)}
+                          className={`w-full text-left p-4 rounded-xl text-[10px] font-bold truncate uppercase transition-all ${editingList.items?.some(it => it.vaultItemId === v.id)
+                              ? 'bg-white/5 opacity-30 cursor-not-allowed'
+                              : 'bg-white/5 hover:bg-primary-blue/10 hover:text-primary-blue'
+                            }`}
+                        >
+                          {v.title}
+                        </button>
+                      ))
+                    ) : (
+                      <p className="text-[10px] text-gray-700 italic">No published signals available</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col justify-end gap-4">
-                  <button onClick={handleSave} className="w-full py-5 bg-primary-blue text-black font-black text-[11px] uppercase tracking-widest rounded-3xl shadow-xl shadow-primary-blue/20">Commit Changes</button>
-                  <button onClick={() => setEditingList(null)} className="w-full py-5 bg-white/5 text-gray-500 font-black text-[11px] uppercase tracking-widest rounded-3xl hover:text-white">Abort Ops</button>
+                  <button
+                    onClick={handleSave}
+                    className="w-full py-5 bg-primary-blue text-black font-black text-[11px] uppercase tracking-[0.3em] rounded-3xl shadow-xl shadow-primary-blue/20 hover:scale-[1.02] active:scale-95 transition-all"
+                  >
+                    Commit Changes
+                  </button>
+                  <button
+                    onClick={() => setEditingList(null)}
+                    className="w-full py-5 bg-white/5 text-gray-500 font-black text-[11px] uppercase tracking-[0.3em] rounded-3xl hover:text-white hover:bg-white/10 transition-all"
+                  >
+                    Abort Ops
+                  </button>
                 </div>
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {lists.map(list => (
-                <div key={list.id} className="p-10 bg-white/5 border border-white/5 rounded-[3rem] space-y-6 hover:border-primary-blue/30 transition-all">
-                  <h3 className="text-xl font-black uppercase italic tracking-tighter">{list.title}</h3>
-                  <p className="text-xs text-gray-500 italic">{list.items.length} signals tracked</p>
-                  <button onClick={() => setEditingList(list)} className="w-full py-4 bg-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-primary-blue hover:text-black transition-all">Modify Ranks</button>
+                <div key={list.id} className="p-10 bg-white/5 border border-white/5 rounded-[3rem] space-y-6 hover:border-primary-blue/30 transition-all group">
+                  <div className="flex justify-between items-start">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-primary-blue bg-primary-blue/10 px-3 py-1 rounded-full">{list.type}</span>
+                    <button
+                      onClick={async () => {
+                        if (confirm('Deconstruct this ranking list?')) {
+                          const updated = lists.filter(l => l.id !== list.id);
+                          setLists(updated);
+                          await storageService.saveRankingLists(updated);
+                        }
+                      }}
+                      className="text-gray-600 hover:text-primary-red material-symbols-outlined opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                      delete
+                    </button>
+                  </div>
+                  <h3 className="text-2xl font-black uppercase italic tracking-tighter leading-tight">{list.title}</h3>
+                  <div className="flex items-center gap-3 text-gray-500">
+                    <span className="material-symbols-outlined text-sm">analytics</span>
+                    <p className="text-[10px] font-bold uppercase tracking-widest">{list.items.length} signals tracked</p>
+                  </div>
+                  <button
+                    onClick={() => setEditingList(list)}
+                    className="w-full py-4 bg-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-primary-blue hover:text-black transition-all border border-white/5"
+                  >
+                    Modify Ranks
+                  </button>
                 </div>
               ))}
+              {lists.length === 0 && (
+                <div className="col-span-full py-40 border border-dashed border-white/5 rounded-[4rem] flex flex-col items-center justify-center opacity-20">
+                  <span className="material-symbols-outlined text-7xl mb-6">leaderboard</span>
+                  <p className="text-xl font-black uppercase tracking-[0.5em]">No Rank Lists Defined</p>
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -1,9 +1,9 @@
-
 import * as React from 'react';
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { storageService } from '../services/storage';
 import { User, UserRole } from '../types';
+import AdminLayout from '../components/AdminLayout';
 
 const AdminUsers: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -54,38 +54,8 @@ const AdminUsers: React.FC = () => {
   const pendingCount = users.filter(u => !u.isApproved && !u.isRejected && u.isVerified).length;
 
   return (
-    <div className="flex h-screen bg-[#050505] text-white overflow-hidden">
-      <aside className="w-72 bg-[#0c0c0c] border-r border-white/5 flex flex-col shrink-0">
-        <div className="p-10 border-b border-white/5">
-          <Link to="/" className="text-2xl font-black italic tracking-tighter text-primary-red flex items-center gap-3">
-            <span className="material-symbols-outlined text-3xl animate-boltFlash">bolt</span> COMMAND
-          </Link>
-        </div>
-        <nav className="flex-1 p-8 space-y-4">
-          <Link to="/admin" className="flex items-center gap-5 p-5 rounded-2xl text-gray-500 hover:text-white hover:bg-white/5">
-            <span className="material-symbols-outlined">grid_view</span>
-            <span className="font-bold text-[11px] uppercase tracking-widest">Dashboard</span>
-          </Link>
-          <Link to="/admin/content" className="flex items-center gap-5 p-5 rounded-2xl text-gray-500 hover:text-white hover:bg-white/5">
-            <span className="material-symbols-outlined">inventory_2</span>
-            <span className="font-bold text-[11px] uppercase tracking-widest">Vault Content</span>
-          </Link>
-          <Link to="/admin/users" className="flex items-center gap-5 p-5 rounded-2xl bg-primary-blue/10 text-primary-blue border border-primary-blue/20">
-            <span className="material-symbols-outlined">group</span>
-            <span className="font-bold text-[11px] uppercase tracking-widest">Personnel Matrix</span>
-          </Link>
-          <Link to="/admin/subscribers" className="flex items-center gap-5 p-5 rounded-2xl text-gray-500 hover:text-white hover:bg-white/5">
-            <span className="material-symbols-outlined">mail</span>
-            <span className="font-bold text-[11px] uppercase tracking-widest">Subscribers</span>
-          </Link>
-          <Link to="/admin/profile" className="flex items-center gap-5 p-5 rounded-2xl text-gray-500 hover:text-white hover:bg-white/5">
-            <span className="material-symbols-outlined">account_circle</span>
-            <span className="font-bold text-[11px] uppercase tracking-widest">My Profile</span>
-          </Link>
-        </nav>
-      </aside>
-
-      <main className="flex-1 flex flex-col min-w-0 bg-[#0a0f1a]">
+    <AdminLayout>
+      <div className="flex-1 flex flex-col min-w-0 bg-[#0a0f1a] h-full">
         <header className="px-12 py-10 border-b border-white/5 flex justify-between items-center bg-[#0a0f1a]/80 backdrop-blur-xl">
           <div>
             <span className="text-primary-blue text-[10px] font-black uppercase tracking-[0.4em] mb-1 block">Security Clearance</span>
@@ -174,8 +144,8 @@ const AdminUsers: React.FC = () => {
             </table>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 

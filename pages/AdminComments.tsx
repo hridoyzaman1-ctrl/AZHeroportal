@@ -1,8 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useContent } from '../App';
 import { adminHandlers } from '../storage/handlers';
+import AdminLayout from '../components/AdminLayout';
 
 const AdminComments: React.FC = () => {
   const { vaultItems, refreshItems } = useContent();
@@ -11,7 +11,7 @@ const AdminComments: React.FC = () => {
 
   // Flatten comments with their parent article info
   const allComments = useMemo(() => {
-    return vaultItems.flatMap(item => 
+    return vaultItems.flatMap(item =>
       item.comments.map(c => ({
         ...c,
         articleId: item.id,
@@ -20,7 +20,7 @@ const AdminComments: React.FC = () => {
     ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [vaultItems]);
 
-  const filtered = allComments.filter(c => 
+  const filtered = allComments.filter(c =>
     c.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.articleTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -40,34 +40,8 @@ const AdminComments: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-[#050505] text-white overflow-hidden">
-      <aside className="w-72 bg-[#0c0c0c] border-r border-white/5 flex flex-col shrink-0">
-        <div className="p-10 border-b border-white/5">
-          <Link to="/" className="text-2xl font-black italic tracking-tighter text-primary-red flex items-center gap-3">
-             <span className="material-symbols-outlined text-3xl">bolt</span> COMMAND
-          </Link>
-        </div>
-        <nav className="flex-1 p-8 space-y-4">
-          <Link to="/admin" className="flex items-center gap-5 p-5 rounded-2xl text-gray-500 hover:text-white hover:bg-white/5">
-            <span className="material-symbols-outlined">grid_view</span>
-            <span className="font-bold text-[11px] uppercase tracking-widest">Dashboard</span>
-          </Link>
-          <Link to="/admin/content" className="flex items-center gap-5 p-5 rounded-2xl text-gray-500 hover:text-white hover:bg-white/5">
-            <span className="material-symbols-outlined">inventory_2</span>
-            <span className="font-bold text-[11px] uppercase tracking-widest">Vault Content</span>
-          </Link>
-          <Link to="/admin/comments" className="flex items-center gap-5 p-5 rounded-2xl bg-primary-blue/10 text-primary-blue border border-primary-blue/20">
-            <span className="material-symbols-outlined">reviews</span>
-            <span className="font-bold text-[11px] uppercase tracking-widest">Review Control</span>
-          </Link>
-          <Link to="/admin/users" className="flex items-center gap-5 p-5 rounded-2xl text-gray-500 hover:text-white hover:bg-white/5">
-            <span className="material-symbols-outlined">group</span>
-            <span className="font-bold text-[11px] uppercase tracking-widest">User Access</span>
-          </Link>
-        </nav>
-      </aside>
-
-      <main className="flex-1 flex flex-col min-w-0 bg-[#0a0f1a]">
+    <AdminLayout>
+      <div className="flex-1 flex flex-col min-w-0 bg-[#0a0f1a] h-full">
         <header className="px-12 py-10 border-b border-white/5 flex justify-between items-center">
           <div>
             <span className="text-primary-blue text-[10px] font-black uppercase tracking-[0.4em] mb-1 block">Reader Intel Moderation</span>
@@ -75,9 +49,9 @@ const AdminComments: React.FC = () => {
           </div>
           <div className="relative w-96">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600">search</span>
-            <input 
-              type="text" 
-              placeholder="Search by name, email, or content..." 
+            <input
+              type="text"
+              placeholder="Search by name, email, or content..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-xs font-bold focus:border-primary-blue outline-none transition-all"
@@ -117,21 +91,21 @@ const AdminComments: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-10 py-8">
-                         <div className={`size-12 rounded-xl flex flex-col items-center justify-center border ${comment.userScore >= 8 ? 'bg-green-500/10 border-green-500/30 text-green-500' : comment.userScore >= 5 ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500' : 'bg-primary-red/10 border-primary-red/30 text-primary-red'}`}>
-                            <span className="text-sm font-black italic leading-none">{comment.userScore}</span>
-                            <span className="text-[7px] font-black uppercase opacity-60">Pts</span>
-                         </div>
+                        <div className={`size-12 rounded-xl flex flex-col items-center justify-center border ${comment.userScore >= 8 ? 'bg-green-500/10 border-green-500/30 text-green-500' : comment.userScore >= 5 ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500' : 'bg-primary-red/10 border-primary-red/30 text-primary-red'}`}>
+                          <span className="text-sm font-black italic leading-none">{comment.userScore}</span>
+                          <span className="text-[7px] font-black uppercase opacity-60">Pts</span>
+                        </div>
                       </td>
                       <td className="px-10 py-8 text-right">
                         <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button 
+                          <button
                             onClick={() => handleToggle(comment.articleId, comment.id)}
                             className={`p-3 rounded-xl transition-all ${comment.isVisible ? 'bg-white/5 text-gray-500 hover:text-white' : 'bg-primary-blue text-black'}`}
                             title={comment.isVisible ? 'Censor Transmission' : 'Restore Signal'}
                           >
                             <span className="material-symbols-outlined text-sm">{comment.isVisible ? 'visibility_off' : 'visibility'}</span>
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleDelete(comment.articleId, comment.id)}
                             className="p-3 bg-white/5 text-gray-500 hover:text-primary-red hover:bg-primary-red/10 rounded-xl transition-all"
                             title="Terminate Pulse"
@@ -152,8 +126,8 @@ const AdminComments: React.FC = () => {
             </div>
           )}
         </div>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 
