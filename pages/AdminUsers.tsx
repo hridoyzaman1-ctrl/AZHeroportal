@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import * as React from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { storageService } from '../services/storage';
 import { User, UserRole } from '../types';
@@ -9,22 +10,36 @@ const AdminUsers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'ACTIVE' | 'PENDING'>('ACTIVE');
 
-  const loadUsers = () => setUsers(storageService.getUsers());
+  const loadUsers = async () => {
+    const data = await storageService.getUsers();
+    setUsers(data);
+  };
   useEffect(() => { loadUsers(); }, []);
 
-  const handleApprove = (userId: string, role: UserRole) => {
-    setUsers(storageService.approveUser(userId, role));
-  };
-
-  const handleReject = (userId: string) => {
-    if (window.confirm("Reject this access request?")) {
-      setUsers(storageService.rejectUser(userId));
+  const handleApprove = async (userId: string, role: UserRole) => {
+    if (window.confirm(`Approving user as ${role}. Confirm?`)) {
+      const updated = await storageService.approveUser(userId, role);
+      setUsers(updated);
     }
   };
 
-  const handleRevoke = (userId: string) => {
-    if (window.confirm("Sever neural link for this personnel?")) {
-      setUsers(storageService.revokeUser(userId));
+  const handleReject = async (userId: string) => {
+    if (window.confirm('Rejecting user access. Confirm?')) {
+      const updated = await storageService.rejectUser(userId);
+      setUsers(updated);
+    }
+  };
+
+  const handleRevoke = async (userId: string) => {
+    const user = users.find(u => u.id === userId);
+    if (user?.email === 'hridoyzaman1@gmail.com') {
+      alert('Cannot revoke Super Admin access.');
+      return;
+    }
+
+    if (window.confirm('Revoking user access. Confirm?')) {
+      const updated = await storageService.revokeUser(userId);
+      setUsers(updated);
     }
   };
 
@@ -43,7 +58,7 @@ const AdminUsers: React.FC = () => {
       <aside className="w-72 bg-[#0c0c0c] border-r border-white/5 flex flex-col shrink-0">
         <div className="p-10 border-b border-white/5">
           <Link to="/" className="text-2xl font-black italic tracking-tighter text-primary-red flex items-center gap-3">
-             <span className="material-symbols-outlined text-3xl animate-boltFlash">bolt</span> COMMAND
+            <span className="material-symbols-outlined text-3xl animate-boltFlash">bolt</span> COMMAND
           </Link>
         </div>
         <nav className="flex-1 p-8 space-y-4">
@@ -63,6 +78,10 @@ const AdminUsers: React.FC = () => {
             <span className="material-symbols-outlined">mail</span>
             <span className="font-bold text-[11px] uppercase tracking-widest">Subscribers</span>
           </Link>
+          <Link to="/admin/profile" className="flex items-center gap-5 p-5 rounded-2xl text-gray-500 hover:text-white hover:bg-white/5">
+            <span className="material-symbols-outlined">account_circle</span>
+            <span className="font-bold text-[11px] uppercase tracking-widest">My Profile</span>
+          </Link>
         </nav>
       </aside>
 
@@ -74,11 +93,11 @@ const AdminUsers: React.FC = () => {
           </div>
           <div className="flex items-center gap-6">
             <div className="flex bg-white/5 p-1 rounded-2xl border border-white/5">
-               <button onClick={() => setActiveTab('ACTIVE')} className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'ACTIVE' ? 'bg-primary-blue text-black' : 'text-gray-500 hover:text-white'}`}>Active</button>
-               <button onClick={() => setActiveTab('PENDING')} className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'PENDING' ? 'bg-yellow-500 text-black' : 'text-gray-500 hover:text-white'}`}>
-                 Requests
-                 {pendingCount > 0 && <span className="absolute -top-1 -right-1 size-5 bg-primary-red text-white text-[8px] flex items-center justify-center rounded-full animate-bounce">{pendingCount}</span>}
-               </button>
+              <button onClick={() => setActiveTab('ACTIVE')} className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'ACTIVE' ? 'bg-primary-blue text-black' : 'text-gray-500 hover:text-white'}`}>Active</button>
+              <button onClick={() => setActiveTab('PENDING')} className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'PENDING' ? 'bg-yellow-500 text-black' : 'text-gray-500 hover:text-white'}`}>
+                Requests
+                {pendingCount > 0 && <span className="absolute -top-1 -right-1 size-5 bg-primary-red text-white text-[8px] flex items-center justify-center rounded-full animate-bounce">{pendingCount}</span>}
+              </button>
             </div>
             <div className="relative w-64">
               <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-sm">person_search</span>
@@ -119,13 +138,13 @@ const AdminUsers: React.FC = () => {
                     <td className="px-10 py-8">
                       {activeTab === 'ACTIVE' ? (
                         <div className="flex items-center gap-3">
-                           <span className="size-2 rounded-full bg-green-500 animate-pulse"></span>
-                           <span className="text-[10px] font-black uppercase tracking-widest text-green-500">{user.role} Clearance</span>
+                          <span className="size-2 rounded-full bg-green-500 animate-pulse"></span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-green-500">{user.role} Clearance</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-3">
-                           <span className="size-2 rounded-full bg-yellow-500 animate-pulse"></span>
-                           <span className="text-[10px] font-black uppercase tracking-widest text-yellow-500">Identity Verified</span>
+                          <span className="size-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-yellow-500">Identity Verified</span>
                         </div>
                       )}
                     </td>
@@ -138,7 +157,7 @@ const AdminUsers: React.FC = () => {
                             <button onClick={() => handleReject(user.id)} className="p-3 bg-white/5 text-gray-500 hover:text-primary-red rounded-xl transition-all"><span className="material-symbols-outlined text-sm">block</span></button>
                           </>
                         ) : (
-                          user.id !== 'admin-001' && (
+                          user.email !== 'hridoyzaman1@gmail.com' && (
                             <button onClick={() => handleRevoke(user.id)} className="px-4 py-2 bg-white/5 text-gray-500 hover:text-primary-red border border-white/5 hover:border-primary-red/20 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">Revoke Access</button>
                           )
                         )}

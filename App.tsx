@@ -1,5 +1,6 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import * as React from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Rankings from './pages/Rankings';
@@ -13,6 +14,7 @@ import AdminCategories from './pages/AdminCategories';
 import AdminRankings from './pages/AdminRankings';
 import AdminSettings from './pages/AdminSettings';
 import AdminAuth from './pages/AdminAuth';
+import AdminProfile from './pages/AdminProfile';
 import Trailers from './pages/Trailers';
 import CategoryPage from './pages/CategoryPage';
 import Reviews from './pages/Reviews';
@@ -21,6 +23,7 @@ import Footer from './components/Footer';
 import Header from './components/Header';
 import { VaultItem, User, Category, SiteSettings } from './types';
 import { storageService } from './services/storage';
+import { soundManager } from './utils/SoundManager';
 
 interface ContentContextType {
   vaultItems: VaultItem[];
@@ -64,7 +67,11 @@ const Navigation: React.FC = () => {
       </div>
 
       <button
-        onClick={toggleTheme}
+        onClick={() => {
+          const newTheme = theme === 'dark' ? 'light' : 'dark';
+          toggleTheme();
+          soundManager.playThemeSwitch(newTheme);
+        }}
         className="group mb-8 w-full bg-slate-100 dark:bg-white/5 py-4 rounded-2xl border border-slate-200 dark:border-white/10 text-[10px] font-black uppercase flex items-center justify-between px-4 hover:scale-[1.02] active:scale-95 transition-all shadow-sm hover:shadow-lg dark:hover:shadow-primary-blue/10"
       >
         <span className="text-slate-600 dark:text-gray-400 group-hover:text-primary-blue transition-colors">
@@ -132,29 +139,72 @@ const LayoutWrapper = ({ children }: { children?: React.ReactNode }) => {
   );
 };
 
+
+import { auth } from './services/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+
 const App: React.FC = () => {
   const [vaultItems, setVaultItems] = useState<VaultItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [settings, setSettings] = useState<SiteSettings>(() => {
-    try { return storageService.getSettings(); } catch { return { siteName: 'Hero Portal', tagline: '', logoUrl: '', socialLinks: [] }; }
+  const [settings, setSettings] = useState<SiteSettings>({
+    address: '',
+    contactEmail: '',
+    socialLinks: []
   });
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    try {
-      const saved = localStorage.getItem('portal_user');
-      return saved ? JSON.parse(saved) : null;
-    } catch { return null; }
-  });
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     try { return (localStorage.getItem('portal_theme') as any) || 'dark'; } catch { return 'dark'; }
   });
 
-  const refreshItems = () => {
-    setVaultItems(storageService.getItems());
-    setCategories(storageService.getCategories());
-    setSettings(storageService.getSettings());
+  const refreshItems = async () => {
+    try {
+      const [items, cats, sets] = await Promise.all([
+        storageService.getItems(),
+        storageService.getCategories(),
+        storageService.getSettings()
+      ]);
+      setVaultItems(items);
+      setCategories(cats);
+      setSettings(sets);
+    } catch (error) {
+      console.error('Failed to refresh content:', error);
+    }
   };
 
-  useEffect(() => { refreshItems(); }, []);
+  useEffect(() => {
+    soundManager.playStartup();
+
+    const init = async () => {
+      await refreshItems();
+      setLoading(false);
+      soundManager.stopStartup();
+    };
+    init();
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Fetch user profile from Firestore if needed, or just use basic auth info
+        const users = await storageService.getUsers();
+        const userProfile = users.find(u => u.email === firebaseUser.email);
+        setCurrentUser(userProfile || {
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || 'User',
+          email: firebaseUser.email || '',
+          role: 'Guest',
+          avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
+          joinedDate: new Date().toLocaleDateString(),
+          isVerified: firebaseUser.emailVerified,
+          isApproved: false,
+          isRejected: false
+        });
+      } else {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     document.documentElement.className = theme;
@@ -163,24 +213,34 @@ const App: React.FC = () => {
 
   const login = (user: User) => {
     setCurrentUser(user);
-    localStorage.setItem('portal_user', JSON.stringify(user));
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await auth.signOut();
     setCurrentUser(null);
-    localStorage.removeItem('portal_user');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background-black flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="size-12 border-4 border-primary-red border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-primary-red">Synchronizing Multiverse...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <ContentContext.Provider value={{
       vaultItems, categories, settings,
-      addItem: (i) => setVaultItems(storageService.addItem(i)),
-      updateItem: (i) => setVaultItems(storageService.updateItem(i)),
-      deleteItem: (id) => setVaultItems(storageService.deleteItem(id)),
+      addItem: async (i) => { await storageService.addItem(i); refreshItems(); },
+      updateItem: async (i) => { await storageService.updateItem(i); refreshItems(); },
+      deleteItem: async (id) => { await storageService.deleteItem(id); refreshItems(); },
       refreshItems,
-      addCategory: (c) => setCategories(storageService.addCategory(c)),
-      deleteCategory: (c) => setCategories(storageService.deleteCategory(c)),
-      updateSettings: (s) => { storageService.saveSettings(s); setSettings(s); },
+      addCategory: async (c) => { await storageService.addCategory(c); refreshItems(); },
+      deleteCategory: async (c) => { await storageService.deleteCategory(c); refreshItems(); },
+      updateSettings: async (s) => { await storageService.saveSettings(s); refreshItems(); },
       theme,
       toggleTheme: () => setTheme(prev => prev === 'dark' ? 'light' : 'dark'),
       currentUser, login, logout
@@ -203,6 +263,7 @@ const App: React.FC = () => {
             <Route path="/admin/subscribers" element={<PrivateRoute><AdminSubscribers /></PrivateRoute>} />
             <Route path="/admin/categories" element={<PrivateRoute><AdminCategories /></PrivateRoute>} />
             <Route path="/admin/rankings" element={<PrivateRoute><AdminRankings /></PrivateRoute>} />
+            <Route path="/admin/profile" element={<PrivateRoute><AdminProfile /></PrivateRoute>} />
             <Route path="/admin/settings" element={<PrivateRoute><AdminSettings /></PrivateRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

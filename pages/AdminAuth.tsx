@@ -1,8 +1,16 @@
-
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useContent } from '../App';
-import { storageService } from '../services/storage';
+import { auth, db } from '../services/firebase';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  sendEmailVerification
+} from 'firebase/auth';
+import { doc, setDoc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
+import { User } from '../types';
 
 type AuthState = 'LOGIN' | 'SIGNUP' | 'VERIFY' | 'PENDING';
 
@@ -13,52 +21,144 @@ const AdminAuth: React.FC = () => {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [mobile, setMobile] = useState('');
-  const [vCode, setVCode] = useState('');
   const [error, setError] = useState('');
-  
+  const [loading, setLoading] = useState(false);
+
   const { login } = useContent();
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const users = storageService.getUsers();
-    const user = users.find(u => u.email === email && u.password === pass);
-    
-    if (!user) {
-      setError('Invalid signal coordinates (Email or Password incorrect).');
-      return;
+    setLoading(true);
+
+    const SUPER_ADMIN_EMAIL = 'hridoyzaman1@gmail.com';
+    const normalizedInputEmail = email.toLowerCase().trim();
+    const isSuperAdmin = normalizedInputEmail === SUPER_ADMIN_EMAIL;
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+      const firebaseUser = userCredential.user;
+
+      // Fetch user profile from Firestore
+      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+
+      // SUPER ADMIN BULLETPROOF BYPASS
+      if (isSuperAdmin) {
+        console.log("🔥 SUPER ADMIN LOGIN - BYPASSING ALL CHECKS");
+
+        // If no user doc exists, create one
+        if (!userDoc.exists()) {
+          const newSuperAdmin: User = {
+            id: firebaseUser.uid,
+            name: 'Super Admin',
+            email: normalizedInputEmail,
+            role: 'Admin',
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${normalizedInputEmail}`,
+            joinedDate: new Date().toLocaleDateString(),
+            isVerified: true,
+            isApproved: true,
+            isRejected: false
+          };
+          await setDoc(doc(db, 'users', firebaseUser.uid), newSuperAdmin);
+          login(newSuperAdmin);
+          navigate('/admin');
+          return;
+        }
+
+        // If doc exists, force correct permissions and login
+        const userData = userDoc.data() as User;
+
+        // Always fix permissions for super admin
+        await updateDoc(doc(db, 'users', firebaseUser.uid), {
+          isApproved: true,
+          role: 'Admin',
+          isRejected: false,
+          isVerified: true
+        });
+
+        // Login with corrected data
+        login({
+          ...userData,
+          isApproved: true,
+          role: 'Admin',
+          isVerified: true,
+          isRejected: false
+        });
+        navigate('/admin');
+        return;
+      }
+
+      // REGULAR USER FLOW
+      if (!userDoc.exists()) {
+        setError('User profile not found in neural grid.');
+        await auth.signOut();
+        return;
+      }
+
+      const userData = userDoc.data() as User;
+
+      if (!userData.isApproved) {
+        if (!userData.isVerified) {
+          setAuthState('VERIFY');
+        } else {
+          setAuthState('PENDING');
+        }
+        await auth.signOut();
+        return;
+      }
+
+      login(userData);
+      navigate('/admin');
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Invalid signal coordinates.');
+    } finally {
+      setLoading(false);
     }
-    
-    if (!user.isApproved) {
-      setAuthState('PENDING');
-      return;
-    }
-    
-    login(user);
-    navigate('/admin');
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const users = storageService.getUsers();
-    if (users.find(u => u.email === email)) {
-      setError('Email already registered in the grid.');
-      return;
-    }
-    
-    storageService.registerUser({ name, email, password: pass, address, mobile });
-    setAuthState('VERIFY');
-  };
+    setLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+      const firebaseUser = userCredential.user;
 
-  const handleVerify = (e: React.FormEvent) => {
-    e.preventDefault();
-    const result = storageService.verifyCode(email, vCode);
-    if (result.success) {
-      setAuthState('PENDING');
-    } else {
-      setError('Invalid verification pulse. Check your uplink.');
+      await updateProfile(firebaseUser, { displayName: name });
+      await sendEmailVerification(firebaseUser);
+
+      const isSuperAdmin = email.toLowerCase().trim() === 'hridoyzaman1@gmail.com';
+
+      const newUser: User = {
+        id: firebaseUser.uid,
+        name,
+        email,
+        address,
+        mobile,
+        role: isSuperAdmin ? 'Admin' : 'Guest',
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
+        joinedDate: new Date().toLocaleDateString(),
+        isVerified: false,
+        isApproved: isSuperAdmin, // FORCE TRUE for Super Admin
+        isRejected: false
+      };
+
+      await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
+
+      if (isSuperAdmin) {
+        // Auto login for super admin
+        login(newUser);
+        navigate('/admin');
+      } else {
+        setAuthState('VERIFY');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Failed to enlist personnel.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,20 +176,20 @@ const AdminAuth: React.FC = () => {
       </Link>
 
       <div className="max-w-md w-full bg-[#0c0c0c]/80 backdrop-blur-2xl border border-white/10 rounded-[3.5rem] p-12 space-y-8 shadow-[0_0_100px_rgba(0,0,0,1)] relative z-10">
-        
+
         <div className="text-center space-y-2">
-           <div className={`size-20 mx-auto flex items-center justify-center mb-6 rounded-3xl border ${authState === 'PENDING' ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-primary-red/10 border-primary-red/20'}`}>
-              <span className={`material-symbols-outlined text-4xl ${authState === 'PENDING' ? 'text-yellow-500' : 'text-primary-red'} ${authState === 'VERIFY' ? 'animate-pulse' : ''}`}>
-                {authState === 'LOGIN' ? 'shield_person' : authState === 'SIGNUP' ? 'person_add' : authState === 'VERIFY' ? 'key' : 'hourglass_top'}
-              </span>
-           </div>
-           <h1 className="text-4xl font-black italic uppercase tracking-tighter">
-             {authState === 'LOGIN' ? 'COMMAND' : authState === 'SIGNUP' ? 'ENLIST' : authState === 'VERIFY' ? 'VERIFY' : 'RESTRICTED'} 
-             <span className={authState === 'PENDING' ? 'text-yellow-500' : 'text-primary-red'}> {authState === 'PENDING' ? 'AREA' : 'AUTH'}</span>
-           </h1>
-           <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-             {authState === 'PENDING' ? 'Awaiting Security Clearance' : 'Neural Grid Link Required'}
-           </p>
+          <div className={`size-20 mx-auto flex items-center justify-center mb-6 rounded-3xl border ${authState === 'PENDING' ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-primary-red/10 border-primary-red/20'}`}>
+            <span className={`material-symbols-outlined text-4xl ${authState === 'PENDING' ? 'text-yellow-500' : 'text-primary-red'} ${authState === 'VERIFY' ? 'animate-pulse' : ''}`}>
+              {authState === 'LOGIN' ? 'shield_person' : authState === 'SIGNUP' ? 'person_add' : authState === 'VERIFY' ? 'mail' : 'hourglass_top'}
+            </span>
+          </div>
+          <h1 className="text-4xl font-black italic uppercase tracking-tighter">
+            {authState === 'LOGIN' ? 'COMMAND' : authState === 'SIGNUP' ? 'ENLIST' : authState === 'VERIFY' ? 'VERIFY' : 'RESTRICTED'}
+            <span className={authState === 'PENDING' ? 'text-yellow-500' : 'text-primary-red'}> {authState === 'PENDING' ? 'AREA' : 'AUTH'}</span>
+          </h1>
+          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
+            {authState === 'PENDING' ? 'Awaiting Security Clearance' : 'Neural Grid Link Required'}
+          </p>
         </div>
 
         {error && (
@@ -102,7 +202,9 @@ const AdminAuth: React.FC = () => {
           <form onSubmit={handleLogin} className="space-y-4">
             <input type="email" placeholder="UPLINK EMAIL" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm font-bold text-white outline-none focus:border-primary-red transition-all" required />
             <input type="password" placeholder="ENCRYPTION KEY" value={pass} onChange={e => setPass(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm font-bold text-white outline-none focus:border-primary-red transition-all" required />
-            <button type="submit" className="w-full py-5 bg-primary-red text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] shadow-xl hover:scale-[1.02] active:scale-95 transition-all">INITIALIZE LINK</button>
+            <button type="submit" disabled={loading} className="w-full py-5 bg-primary-red text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50">
+              {loading ? 'SYNCHRONIZING...' : 'INITIALIZE LINK'}
+            </button>
             <div className="text-center pt-4">
               <button type="button" onClick={() => setAuthState('SIGNUP')} className="text-[9px] font-black text-gray-700 uppercase tracking-widest hover:text-white transition-all underline underline-offset-8">Request Access Permissions</button>
             </div>
@@ -118,7 +220,9 @@ const AdminAuth: React.FC = () => {
             <input type="email" placeholder="EMAIL" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold text-white outline-none focus:border-primary-red" required />
             <input type="text" placeholder="PHYSICAL ADDRESS" value={address} onChange={e => setAddress(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold text-white outline-none focus:border-primary-red" required />
             <input type="password" placeholder="CREATE KEY" value={pass} onChange={e => setPass(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold text-white outline-none focus:border-primary-red" required />
-            <button type="submit" className="w-full py-5 bg-primary-red text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] shadow-xl hover:scale-[1.02] active:scale-95 transition-all">ENLIST PERSONNEL</button>
+            <button type="submit" disabled={loading} className="w-full py-5 bg-primary-red text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50">
+              {loading ? 'ENLISTING...' : 'ENLIST PERSONNEL'}
+            </button>
             <div className="text-center pt-4">
               <button type="button" onClick={() => setAuthState('LOGIN')} className="text-[9px] font-black text-gray-700 uppercase tracking-widest hover:text-white transition-all underline underline-offset-8">Return to Terminal</button>
             </div>
@@ -126,13 +230,12 @@ const AdminAuth: React.FC = () => {
         )}
 
         {authState === 'VERIFY' && (
-          <form onSubmit={handleVerify} className="space-y-8">
+          <div className="space-y-8 text-center animate-fadeIn">
             <div className="text-center space-y-4">
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">Verification pulse sent to your neural freq. Enter the 6-digit code to confirm identity.</p>
-              <input type="text" maxLength={6} placeholder="000000" value={vCode} onChange={e => setVCode(e.target.value)} className="w-40 bg-white/5 border border-white/10 rounded-2xl p-6 text-center text-2xl font-black tracking-[0.5em] text-white outline-none focus:border-primary-blue mx-auto block" required />
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">Verification link sent to your email. Please verify your identity to proceed to Command HQ Queue.</p>
             </div>
-            <button type="submit" className="w-full py-5 bg-primary-blue text-black rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] shadow-xl shadow-primary-blue/20">CONFIRM IDENTITY</button>
-          </form>
+            <button onClick={() => setAuthState('LOGIN')} className="w-full py-5 bg-primary-blue text-black rounded-2xl font-black text-[11px] uppercase tracking-[0.4em]">RETURN TO LOGIN</button>
+          </div>
         )}
 
         {authState === 'PENDING' && (
@@ -152,3 +255,4 @@ const AdminAuth: React.FC = () => {
 };
 
 export default AdminAuth;
+

@@ -132,7 +132,7 @@ const Home: React.FC = () => {
         <div className="lg:col-span-9 lg:order-1 flex flex-col gap-2 lg:gap-3">
           {heroItems.length > 0 && (
             <section
-              className="relative flex-1 min-h-[300px] lg:min-h-0 rounded-xl lg:rounded-2xl overflow-hidden group shadow-2xl border border-white/5 bg-black"
+              className="relative flex-1 min-h-[50vh] lg:min-h-0 rounded-xl lg:rounded-2xl overflow-hidden group shadow-2xl border border-white/5 bg-black"
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
             >
@@ -141,19 +141,19 @@ const Home: React.FC = () => {
                   <img src={item.imageUrl} className="w-full h-full object-cover" alt="" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
 
-                  <div className="absolute bottom-0 left-0 p-4 md:p-8 w-full md:w-3/4 animate-fadeIn">
-                    <div className="flex gap-2 mb-2">
+                  <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full md:w-3/4 animate-fadeIn">
+                    <div className="flex gap-2 mb-4">
                       {item.categories.slice(0, 2).map(c => (
-                        <span key={c} className="bg-primary-red px-3 py-1 text-[8px] font-black uppercase text-white rounded-full tracking-widest shadow-lg">{c}</span>
+                        <span key={c} className="bg-primary-red px-2 py-1 md:px-3 md:py-1 text-[8px] md:text-[8px] font-black uppercase text-white rounded-full tracking-widest shadow-lg">{c}</span>
                       ))}
                     </div>
-                    <h1 className="text-lg md:text-2xl lg:text-3xl font-black text-white italic uppercase tracking-tighter line-clamp-2 leading-[0.95] mb-3 drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+                    <h1 className="text-2xl md:text-2xl lg:text-3xl font-black text-white italic uppercase tracking-tighter line-clamp-2 leading-tight md:leading-[0.95] mb-5 drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
                       {item.title}
                     </h1>
-                    <div className="flex flex-wrap gap-2">
-                      <Link to={`/news/${item.id}`} className="bg-white text-black px-5 py-2 rounded-xl font-black text-[8px] uppercase tracking-widest hover:bg-primary-red hover:text-white transition-all shadow-2xl active:scale-95">Analyze Signal</Link>
+                    <div className="flex flex-wrap gap-3 pb-2">
+                      <Link to={`/news/${item.id}`} className="bg-white text-black px-4 py-2 md:px-5 rounded-xl font-black text-[9px] md:text-[8px] uppercase tracking-widest hover:bg-primary-red hover:text-white transition-all shadow-2xl active:scale-95">Analyze Signal</Link>
                       {item.videoUrl && (
-                        <button onClick={() => openVideo(item)} className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-4 py-2 rounded-xl font-black text-[8px] uppercase tracking-widest hover:bg-primary-blue hover:text-black transition-all flex items-center gap-1">
+                        <button onClick={() => openVideo(item)} className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-4 py-2 rounded-xl font-black text-[9px] md:text-[8px] uppercase tracking-widest hover:bg-primary-blue hover:text-black transition-all flex items-center gap-1">
                           <span className="material-symbols-outlined text-sm">play_arrow</span> Briefing
                         </button>
                       )}

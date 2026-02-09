@@ -1,5 +1,6 @@
 
-import React, { useState, useMemo, useRef } from 'react';
+import * as React from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useContent } from '../App';
 import { VaultItem, ContentType } from '../types';
@@ -114,7 +115,7 @@ const AdminContent: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDeploy = () => {
+  const handleDeploy = async () => {
     if (!formData.title || !formData.content) return alert("Incomplete operational data detected.");
     const finalData = {
       ...(formData as VaultItem),
@@ -125,9 +126,14 @@ const AdminContent: React.FC = () => {
       comments: formData.comments || [],
       userRatings: formData.userRatings || []
     };
-    if (editingId) updateItem(finalData);
-    else addItem(finalData);
-    setShowModal(false);
+    try {
+      if (editingId) await updateItem(finalData);
+      else await addItem(finalData);
+      setShowModal(false);
+    } catch (error) {
+      console.error("Deploy failed:", error);
+      alert("Failed to commit signal to grid.");
+    }
   };
 
   const resetForm = () => setFormData({

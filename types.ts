@@ -11,6 +11,7 @@ export interface User {
   name: string;
   address?: string;
   mobile?: string;
+  dob?: string;
   role: UserRole;
   avatar: string;
   joinedDate: string;
@@ -28,8 +29,8 @@ export interface Subscriber {
 
 export interface Comment {
   id: string;
-  author: string; 
-  email?: string; 
+  author: string;
+  email?: string;
   date: string;
   text: string;
   avatar: string;
@@ -41,17 +42,17 @@ export interface VaultItem {
   id: string;
   type: ContentType;
   title: string;
-  categories: string[]; 
+  categories: string[];
   author: string;
-  date: string; 
+  date: string;
   readTime: string;
   imageUrl: string;
   thumbnailUrl?: string;
   videoUrl?: string;
   content: string;
   summary?: string;
-  rating?: string; 
-  userRatings: number[]; 
+  rating?: string;
+  userRatings: number[];
   likes: number;
   comments: Comment[];
   status: 'Published' | 'Draft' | 'Archived';
