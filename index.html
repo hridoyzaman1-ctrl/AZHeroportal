@@ -31,6 +31,7 @@
                         'fadeIn': 'fadeIn 1s ease-out forwards',
                         'spin-slow': 'spin 8s linear infinite',
                         'scanWipe': 'scanWipe 0.8s ease-in-out forwards',
+                        'scanH': 'scanH 3s linear infinite',
                         'boltFlash': 'boltFlash 1.5s ease-in-out infinite',
                         'portalPulse': 'portalPulse 2s ease-in-out infinite',
                     },
@@ -55,6 +56,12 @@
                         portalPulse: {
                             '0%, 100%': { transform: 'scale(1)', opacity: '1' },
                             '50%': { transform: 'scale(1.05)', opacity: '0.9' },
+                        },
+                        scanH: {
+                            '0%': { top: '0%', opacity: '0' },
+                            '10%': { opacity: '1' },
+                            '90%': { opacity: '1' },
+                            '100%': { top: '100%', opacity: '0' },
                         }
                     }
                 }

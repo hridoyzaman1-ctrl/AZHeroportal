@@ -17,27 +17,44 @@ class SoundManager {
 
     private setupInteractionListener() {
         const enableAudio = () => {
-            this.userInteracted = true;
-            // Pre-play all sounds silently to unlock them
-            this.sounds.forEach(sound => {
-                sound.volume = 0;
-                sound.play().then(() => sound.pause()).catch(() => { });
-                sound.volume = 0.4;
-                sound.currentTime = 0;
-            });
+            this.unlockAudio();
             document.removeEventListener('click', enableAudio);
             document.removeEventListener('keydown', enableAudio);
+            document.removeEventListener('touchstart', enableAudio);
         };
         document.addEventListener('click', enableAudio, { once: true });
         document.addEventListener('keydown', enableAudio, { once: true });
+        document.addEventListener('touchstart', enableAudio, { once: true });
     }
 
+    public unlockAudio() {
+        if (this.userInteracted) return;
+        this.userInteracted = true;
+
+        // Pre-play all sounds silently to unlock them in browser memory
+        this.sounds.forEach(sound => {
+            const originalVolume = sound.volume;
+            sound.volume = 0;
+            sound.play().then(() => {
+                sound.pause();
+                sound.currentTime = 0;
+                sound.volume = originalVolume;
+            }).catch(() => { });
+        });
+
+        // If startup should be playing, start it now
+        if (this.shouldBePlayingStartup) {
+            this.playStartup();
+        }
+    }
+
+    private shouldBePlayingStartup: boolean = false;
+
     private preloadSounds() {
-        // Using Pixabay CDN - free sound effects
         const soundUrls = {
-            startup: 'https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a73467.mp3', // Electric buzz
-            lightOn: 'https://cdn.pixabay.com/audio/2021/08/04/audio_0625c1f6c9.mp3', // Light switch
-            darkOn: 'https://cdn.pixabay.com/audio/2022/03/15/audio_8cb749bf9e.mp3'   // Power down
+            startup: '/sounds/startup.mp3',
+            lightOn: '/sounds/light.mp3',
+            darkOn: '/sounds/dark.mp3'
         };
 
         Object.entries(soundUrls).forEach(([key, url]) => {
@@ -50,29 +67,42 @@ class SoundManager {
     }
 
     public playStartup() {
+        this.shouldBePlayingStartup = true;
         if (!this.userInteracted) return;
+
         const sound = this.sounds.get('startup');
         if (sound) {
             sound.loop = true;
-            sound.volume = 0.25;
-            sound.currentTime = 0;
-            sound.play().catch(() => { });
+            sound.volume = 0;
+            sound.play().then(() => {
+                // Fade in
+                let vol = 0;
+                const fadeIn = setInterval(() => {
+                    if (vol < 0.25) {
+                        vol += 0.02;
+                        sound.volume = vol;
+                    } else {
+                        clearInterval(fadeIn);
+                    }
+                }, 50);
+            }).catch(() => { });
         }
     }
 
     public stopStartup() {
+        this.shouldBePlayingStartup = false;
         const sound = this.sounds.get('startup');
         if (sound) {
             const fadeOut = setInterval(() => {
-                if (sound.volume > 0.05) {
-                    sound.volume -= 0.05;
+                if (sound.volume > 0.02) {
+                    sound.volume -= 0.02;
                 } else {
                     sound.pause();
                     sound.currentTime = 0;
-                    sound.volume = 0.25;
+                    sound.volume = 0.4;
                     clearInterval(fadeOut);
                 }
-            }, 80);
+            }, 50);
         }
     }
 
@@ -82,7 +112,13 @@ class SoundManager {
         if (sound) {
             sound.volume = 0.5;
             sound.currentTime = 0;
-            sound.play().catch(() => { });
+            sound.play().catch(() => {
+                // If blocked, unlock first then play
+                if (!this.userInteracted) {
+                    this.unlockAudio();
+                    setTimeout(() => sound.play().catch(() => { }), 100);
+                }
+            });
         }
     }
 }

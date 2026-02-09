@@ -161,6 +161,7 @@ const App: React.FC = () => {
   });
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [portalActivated, setPortalActivated] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     try { return (localStorage.getItem('portal_theme') as any) || 'dark'; } catch { return 'dark'; }
   });
@@ -181,12 +182,9 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    soundManager.playStartup();
-
     const init = async () => {
       await refreshItems();
       setLoading(false);
-      soundManager.stopStartup();
     };
     init();
 
@@ -248,13 +246,53 @@ const App: React.FC = () => {
     setCurrentUser(null);
   };
 
-  if (loading) {
+  if (loading || !portalActivated) {
     return (
-      <div className="min-h-screen bg-background-black flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="size-12 border-4 border-primary-red border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-primary-red">Synchronizing Multiverse...</p>
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 overflow-hidden relative">
+        {/* Cinematic Background Pulse */}
+        <div className="absolute inset-0 bg-primary-red/5 animate-pulse"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary-red/10 rounded-full blur-[120px] opacity-20"></div>
+
+        <div className="relative z-10 flex flex-col items-center gap-12 max-w-sm w-full text-center">
+          <div className="flex flex-col items-center gap-4">
+            <span className="text-primary-red material-symbols-outlined text-6xl animate-boltFlash">bolt</span>
+            <h1 className="text-4xl font-black italic tracking-tighter uppercase">
+              HERO <span className="text-primary-red">PORTAL</span>
+            </h1>
+          </div>
+
+          <div className="w-full space-y-6">
+            {loading ? (
+              <div className="flex flex-col items-center gap-4 py-10">
+                <div className="size-10 border-2 border-primary-red border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-red ml-2">Synchronizing Multiverse...</p>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  soundManager.unlockAudio();
+                  soundManager.playStartup();
+                  setPortalActivated(true);
+                  // Sound effects will end when App transitions, 
+                  // but we want the crackle to stay for the brief splash
+                  setTimeout(() => {
+                    soundManager.stopStartup();
+                  }, 1500);
+                }}
+                className="w-full group relative py-6 bg-white rounded-2xl overflow-hidden hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-primary-red/20"
+              >
+                <div className="absolute inset-0 bg-primary-red translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                <span className="relative z-10 text-black group-hover:text-white font-black text-xs uppercase tracking-[0.5em] ml-2">Initiate Neural Link</span>
+              </button>
+            )}
+            <p className="text-[9px] font-bold text-gray-700 uppercase tracking-widest leading-loose">
+              System Authorization Required <br /> Establish Connection to Proceed
+            </p>
+          </div>
         </div>
+
+        {/* Global Loading Scanline */}
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-primary-red/30 shadow-[0_0_10px_#f20d0d] animate-[scanH_3s_linear_infinite]"></div>
       </div>
     );
   }
