@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hero Portal | Premium Cinematic Multiverse Hub</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-blue": "#00f2ff",
+                        "primary-red": "#f20d0d",
+                        "background-black": "#050505",
+                        "card-dark": "#0f0f0f",
+                        "surface-dark": "#1a1a1a",
+                        "admin-bg": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"]
+                    },
+                    animation: {
+                        'marquee': 'marquee 40s linear infinite',
+                        'fadeIn': 'fadeIn 1s ease-out forwards',
+                        'spin-slow': 'spin 8s linear infinite',
+                        'scanWipe': 'scanWipe 0.8s ease-in-out forwards',
+                        'boltFlash': 'boltFlash 1.5s ease-in-out infinite',
+                        'portalPulse': 'portalPulse 2s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        marquee: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(15px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        scanWipe: {
+                            '0%': { left: '0%', opacity: '1' },
+                            '80%': { opacity: '1' },
+                            '100%': { left: '100%', opacity: '0' },
+                        },
+                        boltFlash: {
+                            '0%, 100%': { opacity: '1', filter: 'drop-shadow(0 0 2px #f20d0d)', transform: 'scale(1)' },
+                            '50%': { opacity: '0.8', filter: 'drop-shadow(0 0 15px #f20d0d)', transform: 'scale(1.15)' },
+                        },
+                        portalPulse: {
+                            '0%, 100%': { transform: 'scale(1)', opacity: '1' },
+                            '50%': { transform: 'scale(1.05)', opacity: '0.9' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @layer utilities {
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            .glow-blue { text-shadow: 0 0 15px rgba(0, 242, 255, 0.6); }
+            .glow-red { text-shadow: 0 0 15px rgba(242, 13, 13, 0.6); }
+            .pause { animation-play-state: paused; }
+        }
+        
+        * { scroll-behavior: smooth; }
+        
+        body { 
+            margin: 0; 
+            background: #050505; 
+            color: white; 
+            font-family: 'Spline Sans', sans-serif; 
+            overflow-x: hidden; 
+            -webkit-font-smoothing: antialiased;
+            transition: background-color 0.5s ease;
+        }
+
+        html.light body {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        ::selection {
+            background-color: #f20d0d;
+            color: white;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1a1a1a;
+            border-radius: 10px;
+        }
+        .light ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "recharts": "https://esm.sh/recharts@^3.7.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.40.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.13.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
