@@ -130,9 +130,9 @@ const AdminContent: React.FC = () => {
       if (editingId) await updateItem(finalData);
       else await addItem(finalData);
       setShowModal(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Deploy failed:", error);
-      alert("Failed to commit signal to grid.");
+      alert(`Failed to commit signal: ${error?.message || error}`);
     }
   };
 
@@ -234,7 +234,7 @@ const AdminContent: React.FC = () => {
                     <td className="px-10 py-6 text-right">
                       <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={() => handleOpenModal(item)} className="p-3 bg-white/5 rounded-xl hover:text-primary-blue transition-all"><span className="material-symbols-outlined text-sm">edit</span></button>
-                        <button onClick={() => deleteItem(item.id)} className="p-3 bg-white/5 rounded-xl hover:text-primary-red transition-all"><span className="material-symbols-outlined text-sm">delete</span></button>
+                        <button onClick={() => { if (confirm('Permanently delete this item?')) deleteItem(item.id); }} className="p-3 bg-white/5 rounded-xl hover:text-primary-red transition-all"><span className="material-symbols-outlined text-sm">delete</span></button>
                       </div>
                     </td>
                   </tr>
@@ -262,8 +262,9 @@ const AdminContent: React.FC = () => {
             <div className="p-10 overflow-y-auto space-y-12 no-scrollbar">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
                 <div className="md:col-span-8 space-y-8">
-                  <div className="grid grid-cols-2 gap-8">
+                  <div className="grid grid-cols-3 gap-6">
                     <input type="text" placeholder="Agent Identity (Author)" value={formData.author} onChange={e => setFormData({ ...formData, author: e.target.value })} className="w-full bg-black/60 border border-white/10 rounded-2xl p-5 text-sm font-bold text-white outline-none focus:border-primary-blue" />
+                    <input type="date" value={formData.date ? formData.date.split('T')[0] : ''} onChange={e => setFormData({ ...formData, date: new Date(e.target.value).toISOString() })} className="w-full bg-black/60 border border-white/10 rounded-2xl p-5 text-sm font-bold text-white outline-none focus:border-primary-blue" title="Publication Date" />
                     <select value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value as ContentType })} className="w-full bg-black/60 border border-white/10 rounded-2xl p-5 text-sm font-black uppercase text-white outline-none focus:border-primary-blue"><option value="Article">Article</option><option value="Blog">Blog</option><option value="Trailer">Trailer</option><option value="Review">Review</option></select>
                   </div>
                   <input type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-black/60 border border-white/10 rounded-2xl p-5 text-lg font-black uppercase italic text-white outline-none focus:border-primary-blue" placeholder="Broadcast Headline..." />
