@@ -56,6 +56,10 @@ export const storageService = {
     await updateDoc(itemRef, data as any);
   },
 
+  deleteUser: async (id: string) => {
+    await deleteDoc(doc(db, COLLECTIONS.USERS, id));
+  },
+
   deleteItem: async (id: string) => {
     await deleteDoc(doc(db, COLLECTIONS.VAULT, id));
   },
@@ -131,6 +135,7 @@ export const storageService = {
 
   deleteSubscriber: async (id: string) => {
     await deleteDoc(doc(db, COLLECTIONS.SUBSCRIBERS, id));
+    return storageService.getSubscribers();
   },
 
   seedVault: async () => {
