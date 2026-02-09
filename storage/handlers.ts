@@ -49,10 +49,7 @@ export const adminHandlers = {
   },
 
   deleteUser: async (userId: string) => {
-    const { doc, deleteDoc } = await import('firebase/firestore');
-    const { db } = await import('../services/firebase');
-    const userRef = doc(db, 'users', userId);
-    await deleteDoc(userRef);
+    await storageService.deleteUser(userId);
     return storageService.getUsers();
   }
 };

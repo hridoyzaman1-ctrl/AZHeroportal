@@ -18,15 +18,40 @@ const AdminDashboard: React.FC = () => {
     };
   }, [vaultItems]);
 
-  const chartData = [
-    { name: 'Mon', views: 4000, eng: 2400 },
-    { name: 'Tue', views: 3000, eng: 1398 },
-    { name: 'Wed', views: 2000, eng: 9800 },
-    { name: 'Thu', views: 2780, eng: 3908 },
-    { name: 'Fri', views: 1890, eng: 4800 },
-    { name: 'Sat', views: 2390, eng: 3800 },
-    { name: 'Sun', views: 3490, eng: 4300 }
-  ];
+  /* DYNAMIC REAL-TIME ANALYTICS */
+  const chartData = useMemo(() => {
+    // 1. Generate last 7 days labels
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push({
+        date: d.toLocaleDateString(), // Full date for matching
+        dayName: d.toLocaleDateString('en-US', { weekday: 'short' }), // 'Mon', 'Tue' for display
+        views: 0,
+        eng: 0
+      });
+    }
+
+    // 2. Aggregate data from vaultItems based on PUBLICATION DATE
+    // This shows "Performance of content dropped on this day"
+    vaultItems.forEach(item => {
+      const itemDate = new Date(item.date).toLocaleDateString();
+      const targetDay = days.find(d => d.date === itemDate);
+
+      if (targetDay) {
+        targetDay.views += (item.views || 0);
+        // Engagement = Likes + Comments
+        targetDay.eng += (item.likes || 0) + (item.comments?.length || 0);
+      }
+    });
+
+    return days.map(d => ({
+      name: d.dayName,
+      views: d.views,
+      eng: d.eng
+    }));
+  }, [vaultItems]);
 
   const categoryCounts = vaultItems.reduce((acc: any, item) => {
     item.categories.forEach(cat => {
