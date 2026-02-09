@@ -183,23 +183,43 @@ const App: React.FC = () => {
     init();
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        // Fetch user profile from Firestore if needed, or just use basic auth info
-        const users = await storageService.getUsers();
-        const userProfile = users.find(u => u.email === firebaseUser.email);
-        setCurrentUser(userProfile || {
-          id: firebaseUser.uid,
-          name: firebaseUser.displayName || 'User',
-          email: firebaseUser.email || '',
-          role: 'Guest',
-          avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
-          joinedDate: new Date().toLocaleDateString(),
-          isVerified: firebaseUser.emailVerified,
-          isApproved: false,
-          isRejected: false
-        });
-      } else {
-        setCurrentUser(null);
+      try {
+        if (firebaseUser) {
+          // Fetch user profile from Firestore if needed, or just use basic auth info
+          const users = await storageService.getUsers();
+          const userProfile = users.find(u => u.email === firebaseUser.email);
+          setCurrentUser(userProfile || {
+            id: firebaseUser.uid,
+            name: firebaseUser.displayName || 'User',
+            email: firebaseUser.email || '',
+            role: 'Guest',
+            avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
+            joinedDate: new Date().toLocaleDateString(),
+            isVerified: firebaseUser.emailVerified,
+            isApproved: false,
+            isRejected: false
+          });
+        } else {
+          setCurrentUser(null);
+        }
+      } catch (error) {
+        console.error('Auth state change error:', error);
+        // Still set user even if profile fetch fails
+        if (firebaseUser) {
+          setCurrentUser({
+            id: firebaseUser.uid,
+            name: firebaseUser.displayName || 'User',
+            email: firebaseUser.email || '',
+            role: 'Guest',
+            avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
+            joinedDate: new Date().toLocaleDateString(),
+            isVerified: firebaseUser.emailVerified,
+            isApproved: false,
+            isRejected: false
+          });
+        } else {
+          setCurrentUser(null);
+        }
       }
     });
 
