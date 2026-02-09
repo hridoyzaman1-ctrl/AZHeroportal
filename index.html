@@ -1,13 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hero Portal | Premium Cinematic Multiverse Hub</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -61,21 +63,38 @@
     </script>
     <style>
         @layer utilities {
-            .no-scrollbar::-webkit-scrollbar { display: none; }
-            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-            .glow-blue { text-shadow: 0 0 15px rgba(0, 242, 255, 0.6); }
-            .glow-red { text-shadow: 0 0 15px rgba(242, 13, 13, 0.6); }
-            .pause { animation-play-state: paused; }
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+
+            .glow-blue {
+                text-shadow: 0 0 15px rgba(0, 242, 255, 0.6);
+            }
+
+            .glow-red {
+                text-shadow: 0 0 15px rgba(242, 13, 13, 0.6);
+            }
+
+            .pause {
+                animation-play-state: paused;
+            }
         }
-        
-        * { scroll-behavior: smooth; }
-        
-        body { 
-            margin: 0; 
-            background: #050505; 
-            color: white; 
-            font-family: 'Spline Sans', sans-serif; 
-            overflow-x: hidden; 
+
+        * {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: #050505;
+            color: white;
+            font-family: 'Spline Sans', sans-serif;
+            overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             transition: background-color 0.5s ease;
         }
@@ -93,22 +112,25 @@
         ::-webkit-scrollbar {
             width: 6px;
         }
+
         ::-webkit-scrollbar-track {
             background: transparent;
         }
+
         ::-webkit-scrollbar-thumb {
             background: #1a1a1a;
             border-radius: 10px;
         }
+
         .light ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
         }
     </style>
-
-<link rel="stylesheet" href="/index.css">
 </head>
+
 <body>
     <div id="root"></div>
-<script type="module" src="/index.tsx"></script>
+    <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>
