@@ -117,14 +117,21 @@ const AdminContent: React.FC = () => {
 
   const handleDeploy = async () => {
     if (!formData.title || !formData.content) return alert("Incomplete operational data detected.");
+
+    // Calculate read time based on content length (roughly 200 words per minute)
+    const wordCount = (formData.content || '').split(/\s+/).length;
+    const readMinutes = Math.max(1, Math.ceil(wordCount / 200));
+
     const finalData = {
       ...(formData as VaultItem),
       id: editingId || Date.now().toString(),
       date: formData.date || new Date().toISOString(),
+      readTime: formData.readTime || `${readMinutes} min read`,
       views: formData.views || 0,
       likes: formData.likes || 0,
       comments: formData.comments || [],
-      userRatings: formData.userRatings || []
+      userRatings: formData.userRatings || [],
+      categories: formData.categories || []
     };
     try {
       if (editingId) await updateItem(finalData);
