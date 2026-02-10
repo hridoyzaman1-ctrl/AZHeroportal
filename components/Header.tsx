@@ -86,14 +86,6 @@ const Header: React.FC = () => {
               <span>TOP 10</span>
             </Link>
 
-            <button
-              data-testid="mobile-menu-btn"
-              onClick={() => setIsMenuOpen(true)}
-              className={`md:hidden p-2 rounded-lg border ${theme === 'dark' ? 'border-white/10 text-white hover:bg-white/10' : 'border-slate-200 text-slate-900 hover:bg-slate-100'}`}
-            >
-              <span className="material-symbols-outlined">menu</span>
-            </button>
-
             {/* Mobile Theme Toggle - ALWAYS VISIBLE ON MOBILE AT TOP */}
             <button
               onClick={() => {
@@ -109,6 +101,14 @@ const Header: React.FC = () => {
               <span className={`material-symbols-outlined transition-transform duration-700 ${theme === 'dark' ? 'rotate-[360deg]' : ''}`}>
                 {theme === 'dark' ? 'flare' : 'shield'}
               </span>
+            </button>
+
+            <button
+              data-testid="mobile-menu-btn"
+              onClick={() => setIsMenuOpen(true)}
+              className={`md:hidden p-2 rounded-lg border ${theme === 'dark' ? 'border-white/10 text-white hover:bg-white/10' : 'border-slate-200 text-slate-900 hover:bg-slate-100'}`}
+            >
+              <span className="material-symbols-outlined">menu</span>
             </button>
           </div>
         </div>

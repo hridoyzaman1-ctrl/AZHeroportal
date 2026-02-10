@@ -52,7 +52,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, subtitle }) 
                     </button>
                 </div>
 
-                <nav className="flex-1 p-6 space-y-2 overflow-y-auto no-scrollbar">
+                <nav className="flex-1 p-6 space-y-2 overflow-y-auto no-scrollbar relative min-h-0">
                     {menuItems.map((item) => (
                         <Link
                             key={item.path}
@@ -66,6 +66,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, subtitle }) 
                             <span className="font-bold text-[10px] uppercase tracking-[0.2em]">{item.label}</span>
                         </Link>
                     ))}
+
+                    {/* Mobile Scroll Hint */}
+                    <div className="md:hidden pt-4 pb-2 flex flex-col items-center gap-1 opacity-40 animate-pulse">
+                        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-gray-400 font-mono">More Systems Below</span>
+                        <span className="material-symbols-outlined text-xs">keyboard_double_arrow_down</span>
+                    </div>
                 </nav>
 
                 <div className="p-6 border-t border-white/5 space-y-3 bg-black/40">
