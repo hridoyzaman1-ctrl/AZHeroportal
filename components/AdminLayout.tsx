@@ -28,15 +28,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, subtitle }) 
 
     const isActive = (path: string) => location.pathname === path;
 
-    const [showScrollHint, setShowScrollHint] = React.useState(true);
-    const navRef = React.useRef<HTMLDivElement>(null);
-
-    const handleScroll = (e: React.UIEvent<HTMLElement>) => {
-        const target = e.currentTarget;
-        const isAtBottom = target.scrollHeight - target.scrollTop <= target.clientHeight + 20;
-        setShowScrollHint(!isAtBottom);
-    };
-
     // Close sidebar on navigation (mobile)
     React.useEffect(() => {
         setIsSidebarOpen(false);
@@ -62,11 +53,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, subtitle }) 
                 </div>
 
                 <div className="flex-1 overflow-hidden relative group">
-                    <nav
-                        ref={navRef}
-                        onScroll={handleScroll}
-                        className="h-full p-6 space-y-2 overflow-y-auto no-scrollbar relative min-h-0"
-                    >
+                    <nav className="h-full p-6 space-y-2 overflow-y-auto no-scrollbar relative min-h-0">
                         {menuItems.map((item) => (
                             <Link
                                 key={item.path}
@@ -83,9 +70,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, subtitle }) 
                     </nav>
 
                     {/* Persistent Mobile Scroll Hint with Gradient Fade */}
-                    <div className={`md:hidden absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[#0c0c0c] via-[#0c0c0c]/80 to-transparent pointer-events-none flex flex-col items-center justify-end pb-2 transition-all duration-500 ${showScrollHint ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                    <div className="md:hidden absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#0c0c0c] to-transparent pointer-events-none flex flex-col items-center justify-end pb-4 group-hover:opacity-20 transition-opacity">
                         <div className="flex flex-col items-center gap-1 opacity-40 animate-pulse">
-                            <span className="text-[7px] font-black uppercase tracking-[0.3em] text-gray-400 font-mono">Scroll to find more</span>
+                            <span className="text-[7px] font-black uppercase tracking-[0.3em] text-gray-400 font-mono">System Overflow Detected</span>
                             <span className="material-symbols-outlined text-[10px]">keyboard_double_arrow_down</span>
                         </div>
                     </div>
