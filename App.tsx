@@ -148,8 +148,7 @@ const LayoutWrapper = ({ children }: { children?: React.ReactNode }) => {
 };
 
 
-import { auth } from './services/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { supabase } from './services/supabase';
 
 const App: React.FC = () => {
   const [vaultItems, setVaultItems] = useState<VaultItem[]>([]);
@@ -196,7 +195,8 @@ const App: React.FC = () => {
     };
     init();
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const firebaseUser = session?.user;
       try {
         if (firebaseUser) {
           // Fetch user profile from Firestore if needed, or just use basic auth info
@@ -204,8 +204,7 @@ const App: React.FC = () => {
           let userProfile = users.find(u => u.email === firebaseUser.email);
 
           // SYNC VERIFICATION STATUS:
-          // If Firebase Auth says they are verified, but Firestore says they aren't, update Firestore immediately.
-          if (firebaseUser.emailVerified && userProfile && !userProfile.isVerified) {
+          if (firebaseUser.email_confirmed_at && userProfile && !userProfile.isVerified) {
             console.log('Syncing verification status for:', firebaseUser.email);
             await storageService.syncUserVerification(userProfile.id, true);
             // Reload profile after update
@@ -214,13 +213,13 @@ const App: React.FC = () => {
           }
 
           setCurrentUser(userProfile || {
-            id: firebaseUser.uid,
-            name: firebaseUser.displayName || 'User',
+            id: firebaseUser.id,
+            name: firebaseUser.user_metadata?.full_name || 'User',
             email: firebaseUser.email || '',
             role: 'Guest',
-            avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
+            avatar: firebaseUser.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
             joinedDate: new Date().toLocaleDateString(),
-            isVerified: firebaseUser.emailVerified,
+            isVerified: !!firebaseUser.email_confirmed_at,
             isApproved: false,
             isRejected: false
           });
@@ -232,13 +231,13 @@ const App: React.FC = () => {
         // Still set user even if profile fetch fails
         if (firebaseUser) {
           setCurrentUser({
-            id: firebaseUser.uid,
-            name: firebaseUser.displayName || 'User',
+            id: firebaseUser.id,
+            name: firebaseUser.user_metadata?.full_name || 'User',
             email: firebaseUser.email || '',
             role: 'Guest',
-            avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
+            avatar: firebaseUser.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
             joinedDate: new Date().toLocaleDateString(),
-            isVerified: firebaseUser.emailVerified,
+            isVerified: !!firebaseUser.email_confirmed_at,
             isApproved: false,
             isRejected: false
           });
@@ -248,7 +247,7 @@ const App: React.FC = () => {
       }
     });
 
-    return () => unsubscribe();
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -261,7 +260,7 @@ const App: React.FC = () => {
   };
 
   const logout = async () => {
-    await auth.signOut();
+    await supabase.auth.signOut();
     setCurrentUser(null);
   };
 

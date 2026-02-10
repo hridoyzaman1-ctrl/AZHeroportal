@@ -1,6 +1,6 @@
 
 import { VaultItem, User, Category, RankingList, SiteSettings, Subscriber, UserRole } from '../types';
-import { db, auth } from './firebase';
+import { db } from './firebase';
 import {
   collection,
   getDocs,

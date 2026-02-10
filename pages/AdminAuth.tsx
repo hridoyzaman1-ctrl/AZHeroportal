@@ -3,13 +3,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useContent } from '../App';
 import { storageService } from '../services/storage';
-import { auth, db } from '../services/firebase';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  updateProfile,
-  sendEmailVerification
-} from 'firebase/auth';
+import { supabase } from '../services/supabase';
+import { db } from '../services/firebase';
 import { doc, setDoc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
 import { User } from '../types';
 
@@ -39,11 +34,17 @@ const AdminAuth: React.FC = () => {
     const isSuperAdmin = normalizedInputEmail === SUPER_ADMIN_EMAIL;
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-      const firebaseUser = userCredential.user;
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password: pass,
+      });
+
+      if (authError) throw authError;
+
+      const firebaseUser = data.user!;
 
       // Fetch user profile from Firestore
-      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+      const userDoc = await getDoc(doc(db, 'users', firebaseUser.id));
 
       // SUPER ADMIN BULLETPROOF BYPASS
       if (isSuperAdmin) {
@@ -52,7 +53,7 @@ const AdminAuth: React.FC = () => {
         // If no user doc exists, create one
         if (!userDoc.exists()) {
           const newSuperAdmin: User = {
-            id: firebaseUser.uid,
+            id: firebaseUser.id,
             name: 'Super Admin',
             email: normalizedInputEmail,
             role: 'Admin',
@@ -62,7 +63,7 @@ const AdminAuth: React.FC = () => {
             isApproved: true,
             isRejected: false
           };
-          await setDoc(doc(db, 'users', firebaseUser.uid), newSuperAdmin);
+          await setDoc(doc(db, 'users', firebaseUser.id), newSuperAdmin);
           login(newSuperAdmin);
           navigate('/admin');
           return;
@@ -72,7 +73,7 @@ const AdminAuth: React.FC = () => {
         const userData = userDoc.data() as User;
 
         // Always fix permissions for super admin
-        await updateDoc(doc(db, 'users', firebaseUser.uid), {
+        await updateDoc(doc(db, 'users', firebaseUser.id), {
           isApproved: true,
           role: 'Admin',
           isRejected: false,
@@ -97,21 +98,21 @@ const AdminAuth: React.FC = () => {
         // ZOMBIE RECOVERY: User exists in Auth but was wiped from DB.
         // Treat as new Signup.
         const newUser: User = {
-          id: firebaseUser.uid,
-          name: firebaseUser.displayName || 'Unknown Agent',
+          id: firebaseUser.id,
+          name: firebaseUser.user_metadata?.full_name || 'Unknown Agent',
           email: normalizedInputEmail,
           role: 'Guest',
-          avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${normalizedInputEmail}`,
+          avatar: firebaseUser.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${normalizedInputEmail}`,
           joinedDate: new Date().toLocaleDateString(),
-          isVerified: firebaseUser.emailVerified,
+          isVerified: !!firebaseUser.email_confirmed_at,
           isApproved: false,
           isRejected: false
         };
-        await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
+        await setDoc(doc(db, 'users', firebaseUser.id), newUser);
 
         // Show Pending Screen
         setAuthState(newUser.isVerified ? 'PENDING' : 'VERIFY');
-        await auth.signOut();
+        await supabase.auth.signOut();
         return;
       }
 
@@ -119,7 +120,7 @@ const AdminAuth: React.FC = () => {
 
       if (userData.isRejected) {
         setError('ACCESS DENIED. Your previous request was rejected. You may request access again to appeal.');
-        await auth.signOut();
+        await supabase.auth.signOut();
         return;
       }
 
@@ -129,7 +130,7 @@ const AdminAuth: React.FC = () => {
         } else {
           setAuthState('PENDING');
         }
-        await auth.signOut();
+        await supabase.auth.signOut();
         return;
       }
 
@@ -148,11 +149,11 @@ const AdminAuth: React.FC = () => {
     setError('');
     setLoading(true);
     try {
-      // 1. STRICT SIGNUP CHECK
       const normalizedEmail = email.toLowerCase().trim();
       const existingUser = await storageService.getUserByEmail(normalizedEmail);
+      const isSuperAdmin = normalizedEmail === 'hridoyzaman1@gmail.com';
 
-      if (existingUser) {
+      if (existingUser && !isSuperAdmin) {
         if (existingUser.isApproved) {
           throw new Error("Account already exists. Please log in.");
         }
@@ -162,27 +163,22 @@ const AdminAuth: React.FC = () => {
         // If Rejected, we allow them to proceed (Appeal)
       }
 
-      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-      const firebaseUser = userCredential.user;
+      const { data, error: authError } = await supabase.auth.signUp({
+        email,
+        password: pass,
+        options: {
+          data: {
+            full_name: name
+          },
+          emailRedirectTo: window.location.origin + '/admin/auth'
+        }
+      });
 
-      await updateProfile(firebaseUser, { displayName: name });
-
-      // 2. VERIFICATION LOOP: Try "Smart Link" (Redirect), Fallback to Standard
-      try {
-        await sendEmailVerification(firebaseUser, {
-          url: window.location.origin + '/admin/auth',
-          handleCodeInApp: true
-        });
-      } catch (emailError: any) {
-        console.warn("Smart Redirect failed (likely domain missing from Firebase allowed list). Falling back to standard email.", emailError);
-        // Fallback: Send standard email without redirect URL (Always works)
-        await sendEmailVerification(firebaseUser);
-      }
-
-      const isSuperAdmin = normalizedEmail === 'hridoyzaman1@gmail.com';
+      if (authError) throw authError;
+      const firebaseUser = data.user!;
 
       const newUser: User = {
-        id: firebaseUser.uid,
+        id: firebaseUser.id,
         name,
         email: normalizedEmail,
         address,
@@ -195,7 +191,7 @@ const AdminAuth: React.FC = () => {
         isRejected: false
       };
 
-      await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
+      await setDoc(doc(db, 'users', firebaseUser.id), newUser);
 
       if (isSuperAdmin) {
         // Auto login for super admin
@@ -206,7 +202,7 @@ const AdminAuth: React.FC = () => {
       }
     } catch (err: any) {
       console.error(err);
-      if (err.code === 'auth/email-already-in-use') {
+      if (err.message?.includes('already registered') || err.code === '23505') {
         const normalizedEmail = email.toLowerCase().trim();
         // Check if they are actually in the DB (Blocked) or just in Auth (Wiped)
         const existingUser = await storageService.getUserByEmail(normalizedEmail);
@@ -334,30 +330,23 @@ const AdminAuth: React.FC = () => {
             </div>
             <div className="flex flex-col gap-3">
               <button onClick={() => {
-                if (auth.currentUser) {
-                  sendEmailVerification(auth.currentUser).then(() => alert("New Link Sent via Secure Channel."));
-                } else {
-                  alert("Session expired. Please Login first.");
-                  setAuthState('LOGIN');
-                }
+                supabase.auth.getSession().then(({ data }) => {
+                  if (data.session?.user) {
+                    supabase.auth.resend({
+                      type: 'signup',
+                      email: data.session.user.email!,
+                      options: {
+                        emailRedirectTo: window.location.origin + '/admin/auth'
+                      }
+                    }).then(() => alert("New Link Sent via Secure Channel."));
+                  } else {
+                    alert("Session expired. Please Login first.");
+                    setAuthState('LOGIN');
+                  }
+                });
               }} className="w-full py-5 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] transition-all">
                 RESEND UPLINK
               </button>
-              <div className="flex flex-col gap-3">
-                <button onClick={() => {
-                  if (auth.currentUser) {
-                    sendEmailVerification(auth.currentUser)
-                      .then(() => alert("New Link Sent via Secure Channel."))
-                      .catch(e => alert("Error: " + e.message));
-                  } else {
-                    alert("Session expired. Please Login in 'Verify Mode' to resend.");
-                    setAuthState('LOGIN');
-                  }
-                }} className="w-full py-5 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] transition-all">
-                  RESEND UPLINK
-                </button>
-                <button onClick={() => setAuthState('LOGIN')} className="w-full py-5 bg-primary-blue text-black rounded-2xl font-black text-[11px] uppercase tracking-[0.4em]">RETURN TO LOGIN</button>
-              </div>
             </div>
           </div>
         )}
