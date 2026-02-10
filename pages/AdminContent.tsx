@@ -168,25 +168,25 @@ const AdminContent: React.FC = () => {
 
   return (
     <AdminLayout title="THE VAULT" subtitle="Intelligence Storage">
-      <div className="flex-1 flex flex-col bg-[#0a0f1a] overflow-hidden h-full">
-        <div className="px-6 md:px-12 py-6 md:py-10 border-b border-white/5 flex flex-col md:flex-row justify-between gap-4 md:gap-6 items-start md:items-center">
+      <div className="flex-1 flex flex-col bg-[#0a0f1a] overflow-hidden h-full uppercase">
+        <div className="px-6 md:px-12 py-3 md:py-10 border-b border-white/5 flex flex-col md:flex-row justify-between gap-4 md:gap-6 items-start md:items-center">
           <div className="md:block hidden truncate">
             <h2 className="text-xl font-black italic uppercase tracking-tighter">DATA <span className="text-primary-blue">REPOSITORY</span></h2>
           </div>
-          <div className="flex w-full md:w-auto gap-4">
+          <div className="flex w-full md:w-auto gap-3 md:gap-4">
             <div className="relative flex-1 md:w-64">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-sm">search</span>
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-[12px] md:text-sm">search</span>
               <input
                 type="text"
                 placeholder="Filter signals..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-black/50 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-xs font-bold focus:border-primary-blue outline-none transition-all"
+                className="w-full bg-black/50 border border-white/10 rounded-xl py-2 pl-9 md:pl-10 pr-4 text-[10px] md:text-xs font-bold focus:border-primary-blue outline-none transition-all placeholder:text-gray-700"
               />
             </div>
             <button
               onClick={() => handleOpenModal()}
-              className="px-6 md:px-8 py-3 bg-primary-blue text-black rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition-all shrink-0"
+              className="px-4 md:px-8 py-2 md:py-3 bg-primary-blue text-black rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-widest shadow-lg active:scale-95 transition-all shrink-0"
             >
               Inject Intel
             </button>

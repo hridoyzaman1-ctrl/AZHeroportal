@@ -70,20 +70,22 @@ const AdminRankings: React.FC = () => {
 
   return (
     <AdminLayout title="RANKING COMMAND" subtitle="Epic Content Curation">
-      <div className="flex flex-col bg-[#0a0f1a] h-full overflow-hidden">
-        <div className="flex-1 p-6 md:p-12 space-y-8 md:space-y-12 overflow-y-auto no-scrollbar">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-0">
-            <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Operational Data</p>
-              <h2 className="text-xl font-black italic uppercase tracking-tighter">{lists.length} ACTIVE <span className="text-primary-blue">SEQUENCES</span></h2>
+      <div className="flex flex-col bg-[#0a0f1a] h-full overflow-hidden uppercase">
+        <div className="flex-1 p-6 md:p-12 space-y-6 md:space-y-12 overflow-y-auto no-scrollbar">
+          {!editingList && (
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-0">
+              <div className="md:block hidden">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Operational Data</p>
+                <h2 className="text-xl font-black italic uppercase tracking-tighter">{lists.length} ACTIVE <span className="text-primary-blue">SEQUENCES</span></h2>
+              </div>
+              <button
+                onClick={() => setEditingList({ title: '', items: [], type: 'Best', description: '' })}
+                className="w-full md:w-auto px-6 md:px-8 py-3 md:py-4 bg-primary-blue text-black font-black uppercase text-[9px] md:text-[10px] tracking-[0.2em] rounded-2xl active:scale-95 transition-all shadow-[0_0_30px_rgba(0,242,255,0.2)]"
+              >
+                Initiate New Rank Sequence
+              </button>
             </div>
-            <button
-              onClick={() => setEditingList({ title: '', items: [], type: 'Best', description: '' })}
-              className="w-full md:w-auto px-8 py-4 bg-primary-blue text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl hover:scale-105 transition-all shadow-[0_0_30px_rgba(0,242,255,0.2)]"
-            >
-              Initiate New Rank Sequence
-            </button>
-          </div>
+          )}
 
           {editingList ? (
             <div className="max-w-4xl mx-auto bg-white/5 border border-white/10 rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 space-y-8 md:space-y-10 animate-fadeIn">
