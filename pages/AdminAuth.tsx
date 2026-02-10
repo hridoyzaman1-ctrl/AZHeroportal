@@ -23,6 +23,7 @@ const AdminAuth: React.FC = () => {
   const [mobile, setMobile] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { login } = useContent();
   const navigate = useNavigate();
@@ -201,8 +202,23 @@ const AdminAuth: React.FC = () => {
         {authState === 'LOGIN' && (
           <form onSubmit={handleLogin} className="space-y-4">
             <input type="email" placeholder="UPLINK EMAIL" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm font-bold text-white outline-none focus:border-primary-red transition-all" required />
-            <input type="password" placeholder="ENCRYPTION KEY" value={pass} onChange={e => setPass(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm font-bold text-white outline-none focus:border-primary-red transition-all" required />
-            <button type="submit" disabled={loading} className="w-full py-5 bg-primary-red text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50">
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="ENCRYPTION KEY"
+                value={pass}
+                onChange={e => setPass(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm font-bold text-white outline-none focus:border-primary-red transition-all pr-12"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+              >
+                <span className="material-symbols-outlined text-lg">{showPassword ? 'visibility_off' : 'visibility'}</span>
+              </button>
+            </div>            <button type="submit" disabled={loading} className="w-full py-5 bg-primary-red text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50">
               {loading ? 'SYNCHRONIZING...' : 'INITIALIZE LINK'}
             </button>
             <div className="text-center pt-4">
@@ -219,8 +235,23 @@ const AdminAuth: React.FC = () => {
             </div>
             <input type="email" placeholder="EMAIL" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold text-white outline-none focus:border-primary-red" required />
             <input type="text" placeholder="PHYSICAL ADDRESS" value={address} onChange={e => setAddress(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold text-white outline-none focus:border-primary-red" required />
-            <input type="password" placeholder="CREATE KEY" value={pass} onChange={e => setPass(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold text-white outline-none focus:border-primary-red" required />
-            <button type="submit" disabled={loading} className="w-full py-5 bg-primary-red text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50">
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="CREATE KEY"
+                value={pass}
+                onChange={e => setPass(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold text-white outline-none focus:border-primary-red pr-12"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+              >
+                <span className="material-symbols-outlined text-lg">{showPassword ? 'visibility_off' : 'visibility'}</span>
+              </button>
+            </div>            <button type="submit" disabled={loading} className="w-full py-5 bg-primary-red text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50">
               {loading ? 'ENLISTING...' : 'ENLIST PERSONNEL'}
             </button>
             <div className="text-center pt-4">
@@ -232,7 +263,11 @@ const AdminAuth: React.FC = () => {
         {authState === 'VERIFY' && (
           <div className="space-y-8 text-center animate-fadeIn">
             <div className="text-center space-y-4">
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">Verification link sent to your email. Please verify your identity to proceed to Command HQ Queue.</p>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">
+                Verification link sent to your email. Please verify your identity to proceed to Command HQ Queue.
+                <br /><br />
+                <span className="text-primary-red">Note:</span> If you do not see the email in your inbox, please check your spam or junk folder.
+              </p>
             </div>
             <button onClick={() => setAuthState('LOGIN')} className="w-full py-5 bg-primary-blue text-black rounded-2xl font-black text-[11px] uppercase tracking-[0.4em]">RETURN TO LOGIN</button>
           </div>

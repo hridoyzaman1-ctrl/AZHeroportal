@@ -311,32 +311,63 @@ const App: React.FC = () => {
       toggleTheme: () => setTheme(prev => prev === 'dark' ? 'light' : 'dark'),
       currentUser, login, logout
     }}>
-      <Router>
-        <LayoutWrapper>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/trailers" element={<Trailers />} />
-            <Route path="/reviews" element={<Reviews />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/rankings" element={<Rankings />} />
-            <Route path="/category/:type" element={<CategoryPage />} />
-            <Route path="/news/:id" element={<NewsDetail />} />
-            <Route path="/admin/auth" element={<AdminAuth />} />
-            <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
-            <Route path="/admin/content" element={<PrivateRoute><AdminContent /></PrivateRoute>} />
-            <Route path="/admin/comments" element={<PrivateRoute><AdminComments /></PrivateRoute>} />
-            <Route path="/admin/users" element={<PrivateRoute><AdminUsers /></PrivateRoute>} />
-            <Route path="/admin/subscribers" element={<PrivateRoute><AdminSubscribers /></PrivateRoute>} />
-            <Route path="/admin/categories" element={<PrivateRoute><AdminCategories /></PrivateRoute>} />
-            <Route path="/admin/rankings" element={<PrivateRoute><AdminRankings /></PrivateRoute>} />
-            <Route path="/admin/profile" element={<PrivateRoute><AdminProfile /></PrivateRoute>} />
-            <Route path="/admin/settings" element={<PrivateRoute><AdminSettings /></PrivateRoute>} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </LayoutWrapper>
-      </Router>
+      <ErrorBoundary>
+        <Router>
+          <LayoutWrapper>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/trailers" element={<Trailers />} />
+              <Route path="/reviews" element={<Reviews />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/rankings" element={<Rankings />} />
+              <Route path="/category/:type" element={<CategoryPage />} />
+              <Route path="/news/:id" element={<NewsDetail />} />
+              <Route path="/admin/auth" element={<AdminAuth />} />
+              <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
+              <Route path="/admin/content" element={<PrivateRoute><AdminContent /></PrivateRoute>} />
+              <Route path="/admin/comments" element={<PrivateRoute><AdminComments /></PrivateRoute>} />
+              <Route path="/admin/users" element={<PrivateRoute><AdminUsers /></PrivateRoute>} />
+              <Route path="/admin/subscribers" element={<PrivateRoute><AdminSubscribers /></PrivateRoute>} />
+              <Route path="/admin/categories" element={<PrivateRoute><AdminCategories /></PrivateRoute>} />
+              <Route path="/admin/rankings" element={<PrivateRoute><AdminRankings /></PrivateRoute>} />
+              <Route path="/admin/profile" element={<PrivateRoute><AdminProfile /></PrivateRoute>} />
+              <Route path="/admin/settings" element={<PrivateRoute><AdminSettings /></PrivateRoute>} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </LayoutWrapper>
+        </Router>
+      </ErrorBoundary>
     </ContentContext.Provider>
   );
 };
+
+
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error("Uncaught error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="h-screen w-full flex items-center justify-center bg-black text-red-500 font-bold p-10 text-center">
+          <h1>SYSTEM CRITICAL FAILURE</h1>
+          <p className="text-sm mt-4 text-gray-400">Please refresh the neural link (F5)</p>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 export default App;

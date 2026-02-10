@@ -30,7 +30,17 @@ const Header: React.FC = () => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
-  const mainCategories = ['Movies', 'Games', 'Comics', 'DC', 'Marvel', 'Blog'];
+  // Use dynamic categories from context, limited to first 6 for header to prevent overflow
+  // The rest can be accessed via Mobile Menu or a "More" dropdown (future)
+  // We filter out 'Trailers' and 'Reviews' as they have dedicated nav buttons/sections usually
+  const visibleCategories = categories.slice(0, 6);
+
+  const getCategoryLink = (cat: string) => {
+    if (cat === 'Blog') return '/blog';
+    if (cat === 'Trailers') return '/trailers';
+    if (cat === 'Reviews') return '/reviews';
+    return `/category/${cat}`;
+  };
 
   return (
     <>
@@ -45,11 +55,11 @@ const Header: React.FC = () => {
             </Link>
 
             <nav className="hidden md:flex items-center gap-8">
-              {mainCategories.map(cat => (
+              {visibleCategories.map(cat => (
                 <Link
                   key={cat}
-                  to={cat === 'Blog' ? '/blog' : `/category/${cat}`}
-                  className={`text-[11px] font-black uppercase tracking-widest transition-all hover:text-primary-red ${location.pathname.includes(cat) ? 'text-primary-red' : 'text-gray-500'
+                  to={getCategoryLink(cat)}
+                  className={`text-[11px] font-black uppercase tracking-widest transition-all hover:text-primary-red ${location.pathname.includes(cat) ? 'text-primary-red' : typeof theme !== 'undefined' && theme === 'dark' ? 'text-gray-400' : 'text-gray-500' // Fixed theme access safely
                     }`}
                 >
                   {cat}
@@ -154,15 +164,17 @@ const Header: React.FC = () => {
             <div className="space-y-4">
               <h3 className={`text-[9px] font-black uppercase tracking-[0.2em] ${theme === 'dark' ? 'text-gray-500' : 'text-slate-400'}`}>Signals</h3>
               <div className="flex flex-col space-y-2">
-                {mainCategories.map(cat => (
-                  <Link
-                    key={cat}
-                    to={cat === 'Blog' ? '/blog' : `/category/${cat}`}
-                    className={`text-xl font-black italic uppercase tracking-tighter ${location.pathname.includes(cat) ? 'text-primary-red' : theme === 'dark' ? 'text-white' : 'text-slate-900'}`}
-                  >
-                    {cat}
-                  </Link>
-                ))}
+                <div className="flex flex-col space-y-2">
+                  {categories.map(cat => (
+                    <Link
+                      key={cat}
+                      to={getCategoryLink(cat)}
+                      className={`text-xl font-black italic uppercase tracking-tighter ${location.pathname.includes(cat) ? 'text-primary-red' : theme === 'dark' ? 'text-white' : 'text-slate-900'}`}
+                    >
+                      {cat}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
 

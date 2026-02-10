@@ -97,10 +97,7 @@ export const storageService = {
   // Settings
   getSettings: async (): Promise<SiteSettings> => {
     const docSnapshot = await getDoc(doc(db, COLLECTIONS.SETTINGS, 'general'));
-    if (docSnapshot.exists()) {
-      return docSnapshot.data() as SiteSettings;
-    }
-    return {
+    const defaults: SiteSettings = {
       address: 'Multiverse HQ, Sector 7-G, Prime Reality Tower, New York, NY 10001',
       showAddress: true,
       contactEmail: 'uplink@heroportal.io',
@@ -113,6 +110,17 @@ export const storageService = {
       ],
       copyrightYear: '2026'
     };
+
+    if (docSnapshot.exists()) {
+      const data = docSnapshot.data() as SiteSettings;
+      // Merge defaults with data to ensure new fields (like socialLinks) exist if missing in DB
+      return {
+        ...defaults,
+        ...data,
+        socialLinks: data.socialLinks || defaults.socialLinks
+      };
+    }
+    return defaults;
   },
 
   saveSettings: async (settings: SiteSettings) => {

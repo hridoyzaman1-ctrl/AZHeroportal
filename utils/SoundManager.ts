@@ -51,17 +51,23 @@ class SoundManager {
     private shouldBePlayingStartup: boolean = false;
 
     private preloadSounds() {
+        // Reverting to robust local files since external downloads failed
         const soundUrls = {
             startup: '/sounds/startup.mp3',
-            lightOn: '/sounds/light.mp3',
-            darkOn: '/sounds/dark.mp3'
+            themeLight: '/sounds/light.mp3', // Fallback to original
+            themeDark: '/sounds/dark.mp3'    // Fallback to original
         };
 
         Object.entries(soundUrls).forEach(([key, url]) => {
             const audio = new Audio(url);
             audio.preload = 'auto';
             audio.volume = 0.4;
-            audio.crossOrigin = 'anonymous';
+
+            // Add error listener to debug loading issues
+            audio.onerror = (e) => {
+                console.warn(`Failed to load sound: ${key} from ${url}`, e);
+            };
+
             this.sounds.set(key, audio);
         });
     }
@@ -107,18 +113,26 @@ class SoundManager {
     }
 
     public playThemeSwitch(theme: 'light' | 'dark') {
-        const key = theme === 'light' ? 'lightOn' : 'darkOn';
+        // Logic: Switching TO 'light' means we were dark, so play "Mechanical Open" (themeLight)
+        // Switching TO 'dark' means we were light, so play "Neon Hum" (themeDark)
+        const key = theme === 'light' ? 'themeLight' : 'themeDark';
         const sound = this.sounds.get(key);
+
         if (sound) {
-            sound.volume = 0.5;
+            sound.volume = theme === 'light' ? 0.3 : 0.5; // Adjust volume per effect
             sound.currentTime = 0;
-            sound.play().catch(() => {
-                // If blocked, unlock first then play
-                if (!this.userInteracted) {
-                    this.unlockAudio();
-                    setTimeout(() => sound.play().catch(() => { }), 100);
-                }
-            });
+            const playPromise = sound.play();
+
+            if (playPromise !== undefined) {
+                playPromise.catch((error) => {
+                    console.log("Audio play blocked or failed:", error);
+                    // If blocked, unlock first then play
+                    if (!this.userInteracted) {
+                        this.unlockAudio();
+                        setTimeout(() => sound.play().catch(() => { }), 100);
+                    }
+                });
+            }
         }
     }
 }

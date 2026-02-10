@@ -12,6 +12,119 @@ const getYouTubeId = (url: string) => {
   return (match && match[7].length === 11) ? match[7] : null;
 };
 
+// Helper to recursively add a reply
+const addReplyToTree = (comments: Comment[], parentId: string, newReply: Comment): Comment[] => {
+  return comments.map(c => {
+    if (c.id === parentId) {
+      return { ...c, replies: [...(c.replies || []), newReply] };
+    }
+    if (c.replies && c.replies.length > 0) {
+      return { ...c, replies: addReplyToTree(c.replies, parentId, newReply) };
+    }
+    return c;
+  });
+};
+
+const CommentItem: React.FC<{
+  comment: Comment;
+  theme: string;
+  onReply: (parentId: string, text: string, name: string, email?: string) => void;
+  depth?: number;
+}> = ({ comment, theme, onReply, depth = 0 }) => {
+  const [isReplying, setIsReplying] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!replyText.trim() || !name.trim()) return;
+    onReply(comment.id, replyText, name, email);
+    setIsReplying(false);
+    setReplyText("");
+    setName("");
+    setEmail("");
+  };
+
+  return (
+    <div className={`mt-6 ${depth > 0 ? 'ml-4 md:ml-12 pl-4 border-l-2 border-white/5' : ''}`}>
+      <div className={`p-6 md:p-8 border rounded-2xl md:rounded-[3rem] flex flex-col md:flex-row gap-6 md:gap-8 group transition-colors ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
+        <div className="shrink-0 flex flex-row md:flex-col items-center gap-4 md:gap-0">
+          <img src={comment.avatar} className="size-12 md:size-16 rounded-xl md:rounded-[1.5rem] border-2 border-primary-blue/20 md:mb-4" alt="" />
+          {comment.userScore !== undefined && (
+            <div className="size-10 md:size-12 rounded-xl bg-primary-blue/10 border border-primary-blue/20 flex items-center justify-center">
+              <span className="text-xs md:text-sm font-black text-primary-blue italic leading-none">{comment.userScore}</span>
+              <span className="text-[6px] md:text-[7px] font-black uppercase text-primary-blue/60 ml-0.5">Pts</span>
+            </div>
+          )}
+        </div>
+        <div className="flex-1 space-y-3">
+          <div className="flex justify-between items-start">
+            <div>
+              <h4 className={`text-base md:text-lg font-black uppercase italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{comment.author}</h4>
+              <span className="text-[10px] font-bold text-gray-500 uppercase">{comment.date}</span>
+            </div>
+            <button
+              onClick={() => setIsReplying(!isReplying)}
+              className="text-[10px] font-black uppercase tracking-widest text-primary-blue hover:text-white transition-colors"
+            >
+              {isReplying ? 'Cancel' : 'Reply'}
+            </button>
+          </div>
+          <p className={`text-sm md:text-base italic leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-slate-600'}`}>"{comment.text}"</p>
+
+          {/* Reply Form */}
+          {isReplying && (
+            <form onSubmit={handleSubmit} className="mt-4 pt-4 border-t border-white/5 space-y-3 animate-fadeIn">
+              <input
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="Your Name*"
+                required
+                className={`w-full p-3 rounded-xl text-xs font-bold outline-none ${theme === 'dark' ? 'bg-black/40 text-white border border-white/10' : 'bg-slate-50 text-slate-900 border-slate-200'}`}
+              />
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="Email (Optional)"
+                className={`w-full p-3 rounded-xl text-xs font-bold outline-none ${theme === 'dark' ? 'bg-black/40 text-white border border-white/10' : 'bg-slate-50 text-slate-900 border-slate-200'}`}
+              />
+              <textarea
+                value={replyText}
+                onChange={e => setReplyText(e.target.value)}
+                placeholder="Write a reply..."
+                required
+                rows={3}
+                className={`w-full p-3 rounded-xl text-xs font-medium outline-none resize-none ${theme === 'dark' ? 'bg-black/40 text-white border border-white/10' : 'bg-slate-50 text-slate-900 border-slate-200'}`}
+              ></textarea>
+              <button type="submit" className="px-6 py-2 bg-primary-blue text-black text-[10px] font-black uppercase tracking-widest rounded-lg hover:scale-105 transition-transform">
+                Post Reply
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+
+      {/* Nested Replies */}
+      {comment.replies && comment.replies.length > 0 && (
+        <div className="space-y-4">
+          {comment.replies.map(reply => (
+            <CommentItem
+              key={reply.id}
+              comment={reply}
+              theme={theme}
+              onReply={onReply}
+              depth={depth + 1}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const NewsDetail: React.FC = () => {
   const { id } = useParams();
   const { vaultItems, updateItem, theme } = useContent();
@@ -82,7 +195,7 @@ const NewsDetail: React.FC = () => {
     const newComment: Comment = {
       id: Date.now().toString(),
       author: authorName,
-      email: authorEmail || undefined,
+      email: authorEmail || null,
       date: new Date().toLocaleDateString(),
       text: commentText,
       avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + authorName,
@@ -264,24 +377,12 @@ const NewsDetail: React.FC = () => {
 
                 <div className="space-y-8">
                   {displayComments.map(comment => (
-                    <div key={comment.id} className={`p-6 md:p-8 border rounded-2xl md:rounded-[3rem] flex flex-col md:flex-row gap-6 md:gap-8 group transition-colors ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
-                      <div className="shrink-0 flex flex-row md:flex-col items-center gap-4 md:gap-0">
-                        <img src={comment.avatar} className="size-12 md:size-16 rounded-xl md:rounded-[1.5rem] border-2 border-primary-blue/20 md:mb-4" alt="" />
-                        <div className="size-10 md:size-12 rounded-xl bg-primary-blue/10 border border-primary-blue/20 flex items-center justify-center">
-                          <span className="text-xs md:text-sm font-black text-primary-blue italic leading-none">{comment.userScore}</span>
-                          <span className="text-[6px] md:text-[7px] font-black uppercase text-primary-blue/60 ml-0.5">Pts</span>
-                        </div>
-                      </div>
-                      <div className="flex-1 space-y-3">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className={`text-base md:text-lg font-black uppercase italic tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{comment.author}</h4>
-                            <span className="text-[10px] font-bold text-gray-500 uppercase">{comment.date}</span>
-                          </div>
-                        </div>
-                        <p className={`text-sm md:text-base italic leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-slate-600'}`}>"{comment.text}"</p>
-                      </div>
-                    </div>
+                    <CommentItem
+                      key={comment.id}
+                      comment={comment}
+                      theme={theme}
+                      onReply={handleReply}
+                    />
                   ))}
 
                   {filteredComments.length > visibleLimit && (

@@ -36,6 +36,7 @@ export interface Comment {
   avatar: string;
   userScore?: number;
   isVisible: boolean;
+  replies?: Comment[];
 }
 
 export interface VaultItem {

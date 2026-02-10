@@ -62,28 +62,47 @@ const AdminProfile: React.FC = () => {
         }
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!currentUser || !e.target.files || e.target.files.length === 0) return;
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-        const file = e.target.files[0];
+        if (!currentUser?.id) {
+            alert("Error: User ID missing. Please re-login.");
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert("File is too large. Max 5MB allowed.");
+            return;
+        }
+
         setUploading(true);
         setMessage('');
 
         try {
-            const storageRef = ref(storage, `profile_images/${currentUser.id}`);
+            // Use a unique name to force browser cache refresh
+            const timestamp = Date.now();
+            const storageRef = ref(storage, `profile_images/${currentUser.id}_${timestamp}`);
+
             await uploadBytes(storageRef, file);
             const downloadURL = await getDownloadURL(storageRef);
 
             const userRef = doc(db, 'users', currentUser.id);
             await updateDoc(userRef, { avatar: downloadURL });
 
+            // Update local state immediately with the new URL
             login({ ...currentUser, avatar: downloadURL });
-            setMessage('Profile picture updated.');
-        } catch (error) {
+            setMessage('Profile picture updated successfully.');
+        } catch (error: any) {
             console.error('Error uploading image:', error);
-            setMessage('Failed to upload image.');
+            const errMsg = error.message || 'Unknown error';
+            setMessage(`Failed: ${errMsg}`);
+            alert(`Upload Error: ${errMsg}`);
         } finally {
             setUploading(false);
+            // Reset input so verified change event fires again if same file selected
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
@@ -150,7 +169,8 @@ const AdminProfile: React.FC = () => {
                                 <input
                                     type="file"
                                     ref={fileInputRef}
-                                    onChange={handleImageUpload}
+                                    id="avatar-upload"
+                                    onChange={handleFileChange}
                                     accept="image/*"
                                     className="hidden"
                                 />
