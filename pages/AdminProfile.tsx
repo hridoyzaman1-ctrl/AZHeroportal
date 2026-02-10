@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { useContent } from '../App';
 import { storage, db } from '../services/firebase';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, uploadBytes, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
 import AdminLayout from '../components/AdminLayout';
 
@@ -78,29 +78,63 @@ const AdminProfile: React.FC = () => {
         }
 
         setUploading(true);
-        setMessage('');
+        setMessage('Starting upload...');
 
         try {
             // Use a unique name to force browser cache refresh
             const timestamp = Date.now();
             const storageRef = ref(storage, `profile_images/${currentUser.id}_${timestamp}`);
 
-            await uploadBytes(storageRef, file);
-            const downloadURL = await getDownloadURL(storageRef);
+            // Upload with metadata
+            const metadata = {
+                contentType: file.type,
+                cacheControl: 'public,max-age=3600'
+            };
 
-            const userRef = doc(db, 'users', currentUser.id);
-            await updateDoc(userRef, { avatar: downloadURL });
+            // Use uploadBytesResumable for better control
+            const uploadTask = uploadBytesResumable(storageRef, file, metadata);
 
-            // Update local state immediately with the new URL
-            login({ ...currentUser, avatar: downloadURL });
-            setMessage('Profile picture updated successfully.');
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    setMessage(`Uploading: ${Math.round(progress)}%`);
+                },
+                (error) => {
+                    console.error("Upload error:", error);
+                    setUploading(false);
+                    setMessage(`Upload failed: ${error.message}`);
+                    alert(`Upload Error: ${error.message}`);
+                },
+                async () => {
+                    // Upload completed successfully
+                    try {
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+                        const userRef = doc(db, 'users', currentUser.id);
+                        await updateDoc(userRef, { avatar: downloadURL });
+
+                        // Update local state immediately with the new URL
+                        // FORCE UPDATE: Create new object reference
+                        const updatedUser = { ...currentUser, avatar: downloadURL };
+                        login(updatedUser);
+
+                        setMessage('Profile picture updated successfully.');
+                        setUploading(false);
+                    } catch (urlError: any) {
+                        console.error("Error getting URL:", urlError);
+                        setMessage(`Failed to get URL: ${urlError.message}`);
+                        setUploading(false);
+                    }
+                }
+            );
+
         } catch (error: any) {
-            console.error('Error uploading image:', error);
+            console.error('Error initiating upload:', error);
             const errMsg = error.message || 'Unknown error';
             setMessage(`Failed: ${errMsg}`);
             alert(`Upload Error: ${errMsg}`);
-        } finally {
             setUploading(false);
+        } finally {
             // Reset input so verified change event fires again if same file selected
             if (fileInputRef.current) fileInputRef.current.value = '';
         }

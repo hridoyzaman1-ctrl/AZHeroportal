@@ -186,7 +186,25 @@ const NewsDetail: React.FC = () => {
     }
   };
 
-  if (!news) return null;
+  if (vaultItems.length === 0) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8 text-center animate-pulse">
+        <span className="material-symbols-outlined text-4xl text-primary-red mb-4">satellite_alt</span>
+        <h2 className="text-xl font-black uppercase tracking-widest text-white">Establishing Uplink...</h2>
+      </div>
+    );
+  }
+
+  if (!news) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8 text-center">
+        <span className="material-symbols-outlined text-6xl text-gray-600 mb-6">signal_disconnected</span>
+        <h1 className="text-4xl font-black uppercase italic tracking-tighter text-white mb-4">SIGNAL LOST</h1>
+        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs mb-8">The requested intelligence dossier could not be located.</p>
+        <button onClick={() => navigate('/')} className="px-8 py-4 bg-white text-black rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-primary-red hover:text-white transition-all">Return to Global Feed</button>
+      </div>
+    );
+  }
 
   const handleComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -224,6 +242,30 @@ const NewsDetail: React.FC = () => {
       // Rollback on failure
       setLocalComments(localComments);
       alert("Multiversal uplink failed. Please retry.");
+    }
+  };
+
+  const handleReply = async (parentId: string, text: string, name: string, email?: string) => {
+    if (!news) return;
+
+    const newReply: Comment = {
+      id: Date.now().toString(),
+      author: name,
+      email: email || null,
+      date: new Date().toLocaleDateString(),
+      text,
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + name,
+      isVisible: true
+    };
+
+    const updatedComments = addReplyToTree(localComments, parentId, newReply);
+    setLocalComments(updatedComments);
+
+    try {
+      await updateItem({ ...news, comments: updatedComments });
+    } catch (error) {
+      console.error("Failed to post reply:", error);
+      alert("Reply transmission failed.");
     }
   };
 

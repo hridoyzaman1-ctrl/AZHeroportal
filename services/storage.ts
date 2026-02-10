@@ -32,9 +32,21 @@ export const storageService = {
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
   },
 
+  getUserByEmail: async (email: string): Promise<User | null> => {
+    const q = query(collection(db, COLLECTIONS.USERS), where('email', '==', email));
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) return null;
+    return { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() } as User;
+  },
+
   updateUserProfile: async (userId: string, data: Partial<User>) => {
     const userRef = doc(db, COLLECTIONS.USERS, userId);
     await updateDoc(userRef, data);
+  },
+
+  syncUserVerification: async (userId: string, isVerified: boolean) => {
+    const userRef = doc(db, COLLECTIONS.USERS, userId);
+    await updateDoc(userRef, { isVerified, isRejected: false }); // Also ensure they aren't rejected if they just verified
   },
 
   // Vault Items (Articles/Trailers)
@@ -88,6 +100,10 @@ export const storageService = {
   },
 
   deleteCategory: async (cat: string) => {
+    const PROTECTED = ['Movies', 'Games', 'Comics', 'DC', 'Marvel', 'Blog', 'Reviews', 'Trailers'];
+    if (PROTECTED.includes(cat)) {
+      return storageService.getCategories();
+    }
     const cats = await storageService.getCategories();
     const updated = cats.filter(c => c !== cat);
     await storageService.saveCategories(updated);
@@ -200,6 +216,17 @@ export const storageService = {
       isRejected: false,
       role: 'Guest'
     });
+    return storageService.getUsers();
+  },
+
+  resetUserDatabase: async (adminEmail: string) => {
+    const users = await storageService.getUsers();
+    const batchPromises = users.map(async (user) => {
+      if (user.email.toLowerCase() !== adminEmail.toLowerCase()) {
+        await deleteDoc(doc(db, COLLECTIONS.USERS, user.id));
+      }
+    });
+    await Promise.all(batchPromises);
     return storageService.getUsers();
   },
 

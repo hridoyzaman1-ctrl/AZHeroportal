@@ -115,8 +115,13 @@ const AdminContent: React.FC = () => {
     setShowModal(true);
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleDeploy = async () => {
-    if (!formData.title || !formData.content) return alert("Incomplete operational data detected.");
+    if (!formData.title) return alert("MISSING INTEL: Please provide a headline (Title).");
+    if (!formData.content) return alert("MISSING INTEL: Please provide a mission briefing (Content).");
+
+    setIsSubmitting(true);
 
     // Calculate read time based on content length (roughly 200 words per minute)
     const wordCount = (formData.content || '').split(/\s+/).length;
@@ -137,9 +142,12 @@ const AdminContent: React.FC = () => {
       if (editingId) await updateItem(finalData);
       else await addItem(finalData);
       setShowModal(false);
+      alert("Signal transmitted successfully.");
     } catch (error: any) {
       console.error("Deploy failed:", error);
       alert(`Failed to commit signal: ${error?.message || error}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -419,7 +427,13 @@ const AdminContent: React.FC = () => {
 
             <footer className="p-10 border-t border-white/5 flex gap-6 bg-black/40">
               <button onClick={() => setShowModal(false)} className="flex-1 py-6 bg-white/5 rounded-[2rem] font-black text-[11px] uppercase tracking-[0.5em] text-white hover:bg-white/10 transition-all">Abort Ops</button>
-              <button onClick={handleDeploy} className="flex-1 py-6 bg-primary-blue text-black rounded-[2rem] font-black text-[11px] uppercase tracking-[0.5em] shadow-[0_10px_40px_rgba(0,242,255,0.2)] hover:scale-[1.02] transition-all">Commit Signal</button>
+              <button
+                onClick={handleDeploy}
+                disabled={isSubmitting}
+                className={`flex-1 py-6 rounded-[2rem] font-black text-[11px] uppercase tracking-[0.5em] shadow-[0_10px_40px_rgba(0,242,255,0.2)] transition-all ${isSubmitting ? 'bg-gray-600 cursor-not-allowed opacity-50' : 'bg-primary-blue text-black hover:scale-[1.02]'}`}
+              >
+                {isSubmitting ? 'TRANSMITTING...' : 'Commit Signal'}
+              </button>
             </footer>
           </div>
         </div>

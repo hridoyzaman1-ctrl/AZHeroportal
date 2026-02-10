@@ -89,9 +89,26 @@ const Header: React.FC = () => {
             <button
               data-testid="mobile-menu-btn"
               onClick={() => setIsMenuOpen(true)}
-              className={`md:hidden material-symbols-outlined ${theme === 'dark' ? 'text-gray-500' : 'text-slate-500'}`}
+              className={`md:hidden p-2 rounded-lg border ${theme === 'dark' ? 'border-white/10 text-white hover:bg-white/10' : 'border-slate-200 text-slate-900 hover:bg-slate-100'}`}
             >
-              menu
+              <span className="material-symbols-outlined">menu</span>
+            </button>
+
+            {/* Mobile Theme Toggle - ALWAYS VISIBLE ON MOBILE AT TOP */}
+            <button
+              onClick={() => {
+                const newTheme = theme === 'dark' ? 'light' : 'dark';
+                toggleTheme();
+                soundManager.playThemeSwitch(newTheme);
+              }}
+              className={`md:hidden p-2 rounded-lg border flex items-center justify-center transition-all ${theme === 'dark'
+                ? 'bg-white/5 border-white/10 text-primary-blue'
+                : 'bg-slate-100 border-slate-200 text-primary-red'
+                }`}
+            >
+              <span className={`material-symbols-outlined transition-transform duration-700 ${theme === 'dark' ? 'rotate-[360deg]' : ''}`}>
+                {theme === 'dark' ? 'flare' : 'shield'}
+              </span>
             </button>
           </div>
         </div>

@@ -32,6 +32,7 @@ const AdminSubscribers: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-xs font-bold focus:border-primary-blue outline-none transition-all"
             />
+            <button onClick={loadSubs} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white pb-1"><span className="material-symbols-outlined text-sm">refresh</span></button>
           </div>
         </div>
 

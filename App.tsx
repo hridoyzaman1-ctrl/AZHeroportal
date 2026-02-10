@@ -107,7 +107,15 @@ const Navigation: React.FC = () => {
 
 const PrivateRoute = ({ children }: { children?: React.ReactNode }) => {
   const { currentUser } = useContent();
-  return currentUser ? <>{children}</> : <Navigate to="/admin/auth" />;
+
+  if (!currentUser) return <Navigate to="/admin/auth" />;
+
+  // CRITICAL SECURITY: Block access if not explicitly approved
+  if (!currentUser.isApproved) {
+    return <Navigate to="/admin/auth" />;
+  }
+
+  return <>{children}</>;
 };
 
 const LayoutWrapper = ({ children }: { children?: React.ReactNode }) => {
@@ -193,7 +201,18 @@ const App: React.FC = () => {
         if (firebaseUser) {
           // Fetch user profile from Firestore if needed, or just use basic auth info
           const users = await storageService.getUsers();
-          const userProfile = users.find(u => u.email === firebaseUser.email);
+          let userProfile = users.find(u => u.email === firebaseUser.email);
+
+          // SYNC VERIFICATION STATUS:
+          // If Firebase Auth says they are verified, but Firestore says they aren't, update Firestore immediately.
+          if (firebaseUser.emailVerified && userProfile && !userProfile.isVerified) {
+            console.log('Syncing verification status for:', firebaseUser.email);
+            await storageService.syncUserVerification(userProfile.id, true);
+            // Reload profile after update
+            const updatedUsers = await storageService.getUsers();
+            userProfile = updatedUsers.find(u => u.email === firebaseUser.email);
+          }
+
           setCurrentUser(userProfile || {
             id: firebaseUser.uid,
             name: firebaseUser.displayName || 'User',
@@ -270,7 +289,8 @@ const App: React.FC = () => {
             ) : (
               <button
                 onClick={() => {
-                  soundManager.unlockAudio();
+                  soundManager.unlockAudio(['themeDark']);
+                  soundManager.playThemeSwitch('dark');
                   soundManager.playStartup();
                   setPortalActivated(true);
                   // Sound effects will end when App transitions, 

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useContent } from '../App';
+import { storageService } from '../services/storage';
 import { auth, db } from '../services/firebase';
 import {
   signInWithEmailAndPassword,
@@ -91,13 +92,36 @@ const AdminAuth: React.FC = () => {
       }
 
       // REGULAR USER FLOW
+      // REGULAR USER FLOW
       if (!userDoc.exists()) {
-        setError('User profile not found in neural grid.');
+        // ZOMBIE RECOVERY: User exists in Auth but was wiped from DB.
+        // Treat as new Signup.
+        const newUser: User = {
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || 'Unknown Agent',
+          email: normalizedInputEmail,
+          role: 'Guest',
+          avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${normalizedInputEmail}`,
+          joinedDate: new Date().toLocaleDateString(),
+          isVerified: firebaseUser.emailVerified,
+          isApproved: false,
+          isRejected: false
+        };
+        await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
+
+        // Show Pending Screen
+        setAuthState(newUser.isVerified ? 'PENDING' : 'VERIFY');
         await auth.signOut();
         return;
       }
 
       const userData = userDoc.data() as User;
+
+      if (userData.isRejected) {
+        setError('ACCESS DENIED. Your previous request was rejected. You may request access again to appeal.');
+        await auth.signOut();
+        return;
+      }
 
       if (!userData.isApproved) {
         if (!userData.isVerified) {
@@ -124,18 +148,43 @@ const AdminAuth: React.FC = () => {
     setError('');
     setLoading(true);
     try {
+      // 1. STRICT SIGNUP CHECK
+      const normalizedEmail = email.toLowerCase().trim();
+      const existingUser = await storageService.getUserByEmail(normalizedEmail);
+
+      if (existingUser) {
+        if (existingUser.isApproved) {
+          throw new Error("Account already exists. Please log in.");
+        }
+        if (!existingUser.isApproved && !existingUser.isRejected) {
+          throw new Error("Clearance Pending. Please wait for Administrator approval.");
+        }
+        // If Rejected, we allow them to proceed (Appeal)
+      }
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
       const firebaseUser = userCredential.user;
 
       await updateProfile(firebaseUser, { displayName: name });
-      await sendEmailVerification(firebaseUser);
 
-      const isSuperAdmin = email.toLowerCase().trim() === 'hridoyzaman1@gmail.com';
+      // 2. VERIFICATION LOOP: Try "Smart Link" (Redirect), Fallback to Standard
+      try {
+        await sendEmailVerification(firebaseUser, {
+          url: window.location.origin + '/admin/auth',
+          handleCodeInApp: true
+        });
+      } catch (emailError: any) {
+        console.warn("Smart Redirect failed (likely domain missing from Firebase allowed list). Falling back to standard email.", emailError);
+        // Fallback: Send standard email without redirect URL (Always works)
+        await sendEmailVerification(firebaseUser);
+      }
+
+      const isSuperAdmin = normalizedEmail === 'hridoyzaman1@gmail.com';
 
       const newUser: User = {
         id: firebaseUser.uid,
         name,
-        email,
+        email: normalizedEmail,
         address,
         mobile,
         role: isSuperAdmin ? 'Admin' : 'Guest',
@@ -157,7 +206,21 @@ const AdminAuth: React.FC = () => {
       }
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Failed to enlist personnel.');
+      if (err.code === 'auth/email-already-in-use') {
+        const normalizedEmail = email.toLowerCase().trim();
+        // Check if they are actually in the DB (Blocked) or just in Auth (Wiped)
+        const existingUser = await storageService.getUserByEmail(normalizedEmail);
+
+        if (existingUser) {
+          // If valid user, standard error
+          setError('Account already exists. Please log in.');
+        } else {
+          // AUTH ZOMBIE DETECTED
+          setError('Account record found in secure archives. Please LOGIN to reactivate your personnel file.');
+        }
+      } else {
+        setError(err.message || 'Failed to enlist personnel.');
+      }
     } finally {
       setLoading(false);
     }
@@ -269,7 +332,33 @@ const AdminAuth: React.FC = () => {
                 <span className="text-primary-red">Note:</span> If you do not see the email in your inbox, please check your spam or junk folder.
               </p>
             </div>
-            <button onClick={() => setAuthState('LOGIN')} className="w-full py-5 bg-primary-blue text-black rounded-2xl font-black text-[11px] uppercase tracking-[0.4em]">RETURN TO LOGIN</button>
+            <div className="flex flex-col gap-3">
+              <button onClick={() => {
+                if (auth.currentUser) {
+                  sendEmailVerification(auth.currentUser).then(() => alert("New Link Sent via Secure Channel."));
+                } else {
+                  alert("Session expired. Please Login first.");
+                  setAuthState('LOGIN');
+                }
+              }} className="w-full py-5 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] transition-all">
+                RESEND UPLINK
+              </button>
+              <div className="flex flex-col gap-3">
+                <button onClick={() => {
+                  if (auth.currentUser) {
+                    sendEmailVerification(auth.currentUser)
+                      .then(() => alert("New Link Sent via Secure Channel."))
+                      .catch(e => alert("Error: " + e.message));
+                  } else {
+                    alert("Session expired. Please Login in 'Verify Mode' to resend.");
+                    setAuthState('LOGIN');
+                  }
+                }} className="w-full py-5 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] transition-all">
+                  RESEND UPLINK
+                </button>
+                <button onClick={() => setAuthState('LOGIN')} className="w-full py-5 bg-primary-blue text-black rounded-2xl font-black text-[11px] uppercase tracking-[0.4em]">RETURN TO LOGIN</button>
+              </div>
+            </div>
           </div>
         )}
 

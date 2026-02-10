@@ -27,12 +27,13 @@ class SoundManager {
         document.addEventListener('touchstart', enableAudio, { once: true });
     }
 
-    public unlockAudio() {
+    public unlockAudio(skipKeys: string[] = []) {
         if (this.userInteracted) return;
         this.userInteracted = true;
 
         // Pre-play all sounds silently to unlock them in browser memory
-        this.sounds.forEach(sound => {
+        this.sounds.forEach((sound, key) => {
+            if (skipKeys.includes(key)) return; // Skip sounds that will be played immediately
             const originalVolume = sound.volume;
             sound.volume = 0;
             sound.play().then(() => {

@@ -2,7 +2,7 @@
 export type Category = string;
 export type SubCategory = 'Marvel' | 'DC' | 'Top Rated' | 'Indie' | 'Other';
 export type ContentType = 'Article' | 'Trailer' | 'Review' | 'Blog';
-export type UserRole = 'Admin' | 'Author' | 'Editor' | 'Guest';
+export type UserRole = 'Admin' | 'Author' | 'Editor' | 'Guest' | string;
 
 export interface User {
   id: string;

@@ -36,7 +36,7 @@ const Home: React.FC = () => {
     if (heroItems.length <= 1) return;
     const timer = setInterval(() => {
       handleNext();
-    }, 10000);
+    }, 5000);
     return () => clearInterval(timer);
   }, [heroItems.length, heroIndex]);
 

@@ -10,7 +10,25 @@ const AdminSettings: React.FC = () => {
   const [localSettings, setLocalSettings] = useState<SiteSettings>(settings);
 
   useEffect(() => {
-    setLocalSettings(settings);
+    // Ensure all platforms exist even if not in DB
+    const startSettings = { ...settings };
+    const defaultLinks: SocialLink[] = [
+      { id: 'fb', platform: 'Facebook', url: '', icon: 'facebook', visible: false },
+      { id: 'wa', platform: 'WhatsApp', url: '', icon: 'chat', visible: false },
+      { id: 'yt', platform: 'YouTube', url: '', icon: 'play_circle', visible: false },
+      { id: 'x', platform: 'X', url: '', icon: 'brand_family', visible: false },
+      { id: 'tk', platform: 'TikTok', url: '', icon: 'music_note', visible: false },
+      { id: 'ig', platform: 'Instagram', url: '', icon: 'camera_alt', visible: false },
+      { id: 'dc', platform: 'Discord', url: '', icon: 'discord', visible: false } // Added requested platforms
+    ];
+
+    // Merge existing with defaults to ensure no data loss but all fields present
+    const mergedLinks = defaultLinks.map(def => {
+      const existing = startSettings.socialLinks.find(l => l.platform === def.platform);
+      return existing || def;
+    });
+
+    setLocalSettings({ ...startSettings, socialLinks: mergedLinks });
   }, [settings]);
 
   const handleSave = async () => {
@@ -56,11 +74,11 @@ const AdminSettings: React.FC = () => {
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-600 ml-4">HQ Address</label>
-                <input type="text" placeholder="Physical HQ Address" value={localSettings.address} onChange={e => setLocalSettings({ ...localSettings, address: e.target.value })} className="w-full bg-black border border-white/10 rounded-2xl p-4 text-xs font-bold text-white outline-none focus:border-primary-blue" />
+                <input type="text" placeholder="Physical HQ Address" value={localSettings.address} onChange={e => setLocalSettings({ ...localSettings, address: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold text-white outline-none focus:border-primary-blue transition-all focus:bg-black/40" />
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-600 ml-4">Contact Gateway</label>
-                <input type="email" placeholder="Operational Contact Email" value={localSettings.contactEmail} onChange={e => setLocalSettings({ ...localSettings, contactEmail: e.target.value })} className="w-full bg-black border border-white/10 rounded-2xl p-4 text-xs font-bold text-white outline-none focus:border-primary-blue" />
+                <input type="email" placeholder="Operational Contact Email" value={localSettings.contactEmail} onChange={e => setLocalSettings({ ...localSettings, contactEmail: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold text-white outline-none focus:border-primary-blue transition-all focus:bg-black/40" />
               </div>
             </div>
           </section>
@@ -88,7 +106,7 @@ const AdminSettings: React.FC = () => {
                     placeholder={`${link.platform} URL`}
                     value={link.url}
                     onChange={e => updateSocialUrl(link.id, e.target.value)}
-                    className="w-full bg-black border border-white/5 rounded-xl p-3 text-[11px] font-bold text-white outline-none focus:border-primary-blue/50"
+                    className="w-full bg-white/5 border border-white/5 rounded-xl p-3 text-[11px] font-bold text-white outline-none focus:border-primary-blue/50 transition-all focus:bg-black/40"
                   />
                 </div>
               ))}
@@ -100,7 +118,7 @@ const AdminSettings: React.FC = () => {
             <h2 className="text-xl font-black uppercase italic tracking-tighter">Chronos Management</h2>
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-600 ml-4">Copyright Year</label>
-              <input type="text" placeholder="2026" value={localSettings.copyrightYear} onChange={e => setLocalSettings({ ...localSettings, copyrightYear: e.target.value })} className="w-1/3 bg-black border border-white/10 rounded-2xl p-4 text-xs font-bold text-white outline-none focus:border-primary-blue" />
+              <input type="text" placeholder="2026" value={localSettings.copyrightYear} onChange={e => setLocalSettings({ ...localSettings, copyrightYear: e.target.value })} className="w-1/3 bg-white/5 border border-white/10 rounded-2xl p-4 text-xs font-bold text-white outline-none focus:border-primary-blue transition-all focus:bg-black/40" />
             </div>
           </section>
 

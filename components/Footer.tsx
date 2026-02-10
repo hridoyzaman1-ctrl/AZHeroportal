@@ -61,15 +61,19 @@ const Footer: React.FC = () => {
             <div>
               <h4 className="text-[11px] font-black text-white uppercase tracking-[0.3em] mb-8">Intelligence</h4>
               <ul className="space-y-4">
+                <li><Link to="/category/Comics" className="text-gray-500 text-sm hover:text-primary-blue transition-colors font-medium">Comics</Link></li>
+                <li><Link to="/category/Games" className="text-gray-500 text-sm hover:text-primary-blue transition-colors font-medium">Games</Link></li>
+                <li><Link to="/reviews" className="text-gray-500 text-sm hover:text-primary-blue transition-colors font-medium">Reviews</Link></li>
                 <li><Link to="/category/Movies" className="text-gray-500 text-sm hover:text-primary-blue transition-colors font-medium">Movies</Link></li>
-                <li><Link to="/trailers" className="text-gray-500 text-sm hover:text-primary-blue transition-colors font-medium">Trailers</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="text-[11px] font-black text-white uppercase tracking-[0.3em] mb-8">Operational</h4>
               <ul className="space-y-4">
-                <li><Link to="/admin" className="text-gray-500 text-sm hover:text-primary-red transition-colors font-medium">Admin HQ</Link></li>
                 <li><Link to="/rankings" className="text-gray-500 text-sm hover:text-primary-blue transition-colors font-medium">Top 10</Link></li>
+                <li><Link to="/admin" className="text-gray-500 text-sm hover:text-primary-red transition-colors font-medium">Admin HQ</Link></li>
+                <li><Link to="/about" className="text-gray-500 text-sm hover:text-primary-blue transition-colors font-medium">About</Link></li>
+                <li><Link to="/privacy" className="text-gray-500 text-sm hover:text-primary-blue transition-colors font-medium">Privacy</Link></li>
               </ul>
             </div>
           </div>
