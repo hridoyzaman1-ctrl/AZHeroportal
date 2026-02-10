@@ -65,7 +65,7 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <AdminLayout title="COMMAND HQ" subtitle="Neural Grid Analytics">
-      <div className="flex-1 p-12 space-y-12">
+      <div className="flex-1 p-6 md:p-12 space-y-6 md:space-y-12">
         {/* STATS GRID */}
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {[
@@ -74,19 +74,19 @@ const AdminDashboard: React.FC = () => {
             { l: 'Engagements', v: stats.totalEngagements, i: 'bolt', c: 'text-primary-red' },
             { l: 'Avg Rating', v: stats.avgRating.toFixed(1), i: 'star', c: 'text-yellow-500' }
           ].map((s, i) => (
-            <div key={i} className="p-10 bg-white/5 border border-white/10 rounded-[3rem] group hover:bg-white/10 transition-all shadow-2xl">
-              <span className={`material-symbols-outlined text-3xl ${s.c} mb-6 block`}>{s.i}</span>
-              <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-2">{s.l}</p>
-              <p className="text-4xl font-black italic tracking-tighter">{s.v}</p>
+            <div key={i} className="p-6 md:p-10 bg-white/5 border border-white/10 rounded-3xl md:rounded-[3rem] group hover:bg-white/10 transition-all shadow-2xl">
+              <span className={`material-symbols-outlined text-2xl md:text-3xl ${s.c} mb-4 md:mb-6 block`}>{s.i}</span>
+              <p className="text-gray-500 text-[8px] md:text-[10px] font-black uppercase tracking-widest mb-1 md:mb-2">{s.l}</p>
+              <p className="text-2xl md:text-4xl font-black italic tracking-tighter">{s.v}</p>
             </div>
           ))}
         </section>
 
         {/* CHARTS */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-8 p-12 bg-white/5 border border-white/10 rounded-[4rem] shadow-2xl">
-            <h3 className="text-xs font-black uppercase tracking-[0.4em] text-gray-500 mb-12">Engagement Matrix</h3>
-            <div className="h-96">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+          <div className="lg:col-span-8 p-6 md:p-12 bg-white/5 border border-white/10 rounded-3xl md:rounded-[4rem] shadow-2xl">
+            <h3 className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-gray-500 mb-8 md:mb-12">Engagement Matrix</h3>
+            <div className="h-64 md:h-96">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData}>
                   <defs>

@@ -37,7 +37,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, subtitle }) 
         <div className="flex h-screen bg-[#050505] text-white overflow-hidden">
             {/* SIDEBAR - Responsive Drawer for Mobile */}
             <aside className={`
-                fixed inset-y-0 left-0 w-80 bg-[#0c0c0c] border-r border-white/5 flex flex-col shrink-0 z-[100] transition-transform duration-300 transform md:relative md:translate-x-0
+                fixed inset-y-0 left-0 w-[280px] md:w-80 bg-[#0c0c0c] border-r border-white/5 flex flex-col shrink-0 z-[100] transition-transform duration-300 transform md:relative md:translate-x-0
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
             `}>
                 <div className="p-6 md:p-8 border-b border-white/5 flex items-center justify-between shrink-0">
@@ -58,13 +58,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, subtitle }) 
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                className={`flex items-center gap-5 p-5 rounded-2xl transition-all group ${isActive(item.path)
+                                className={`flex items-center gap-4 md:gap-5 p-4 md:p-5 rounded-xl md:rounded-2xl transition-all group ${isActive(item.path)
                                     ? 'bg-primary-blue/10 text-primary-blue border border-primary-blue/20 shadow-[0_0_30px_rgba(0,242,255,0.1)]'
                                     : 'text-gray-500 hover:text-white hover:bg-white/5'
                                     }`}
                             >
-                                <span className={`material-symbols-outlined ${isActive(item.path) ? 'text-primary-blue' : 'group-hover:text-primary-blue transition-colors'}`}>{item.icon}</span>
-                                <span className="font-bold text-[10px] uppercase tracking-[0.2em]">{item.label}</span>
+                                <span className={`material-symbols-outlined text-sm md:text-base ${isActive(item.path) ? 'text-primary-blue' : 'group-hover:text-primary-blue transition-colors'}`}>{item.icon}</span>
+                                <span className="font-bold text-[9px] md:text-[10px] uppercase tracking-[0.2em]">{item.label}</span>
                             </Link>
                         ))}
                     </nav>
@@ -108,7 +108,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, subtitle }) 
             {/* MAIN CONTENT FIELD */}
             <main className="flex-1 flex flex-col overflow-hidden relative w-full">
                 {/* GLOBAL ANALYTIC HEADER */}
-                <header className="bg-[#0a0f1a]/80 backdrop-blur-3xl border-b border-white/5 px-6 md:px-10 py-3 md:py-8 flex items-center justify-between z-[40] shrink-0">
+                <header className="bg-[#0a0f1a]/80 backdrop-blur-3xl border-b border-white/5 px-4 md:px-10 py-3 md:py-8 flex items-center justify-between z-[40] shrink-0">
                     <div className="flex items-center gap-4 md:gap-8 overflow-hidden">
                         {/* Mobile Menu Toggle */}
                         <button
