@@ -33,7 +33,7 @@ const AdminCategories: React.FC = () => {
     <AdminLayout title="GRID SECTORS" subtitle="Category Matrix">
       <div className="flex-1 flex flex-col min-w-0 bg-[#0a0f1a] h-full">
 
-        <div className="p-12 space-y-12 overflow-y-auto no-scrollbar">
+        <div className="p-4 md:p-12 space-y-8 md:space-y-12 overflow-y-auto no-scrollbar">
           <div className="max-w-xl mx-auto space-y-10">
             <form onSubmit={handleAdd} className="flex gap-4">
               <input
@@ -52,9 +52,9 @@ const AdminCategories: React.FC = () => {
               {categories.map((cat, idx) => {
                 const isProtected = ['Movies', 'Games', 'Comics', 'DC', 'Marvel', 'Blog', 'Reviews', 'Trailers'].includes(cat);
                 return (
-                  <div key={cat} className="flex justify-between items-center p-6 bg-white/5 border border-white/5 rounded-3xl group transition-all hover:bg-white/10">
-                    <span className="text-sm font-black uppercase tracking-widest flex items-center gap-4">
-                      <span className="text-gray-600 text-[10px]">{idx + 1}</span>
+                  <div key={cat} className="flex justify-between items-center p-4 md:p-6 bg-white/5 border border-white/5 rounded-2xl md:rounded-3xl group transition-all hover:bg-white/10">
+                    <span className="text-xs md:text-sm font-black uppercase tracking-widest flex items-center gap-3 md:gap-4">
+                      <span className="text-gray-600 text-[8px] md:text-[10px]">{idx + 1}</span>
                       {cat}
                     </span>
 
@@ -82,8 +82,8 @@ const AdminCategories: React.FC = () => {
                           <span className="material-symbols-outlined text-sm">lock</span>
                         </span>
                       ) : (
-                        <button onClick={() => deleteCategory(cat)} className="text-gray-600 hover:text-primary-red transition-colors opacity-0 group-hover:opacity-100">
-                          <span className="material-symbols-outlined">delete</span>
+                        <button onClick={() => deleteCategory(cat)} className="text-gray-600 hover:text-primary-red transition-colors opacity-100 md:opacity-0 group-hover:opacity-100 p-2">
+                          <span className="material-symbols-outlined text-sm md:text-base">delete</span>
                         </button>
                       )}
                     </div>

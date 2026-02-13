@@ -193,7 +193,7 @@ const AdminContent: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 md:p-12 space-y-8 no-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 md:p-12 space-y-6 md:space-y-8 no-scrollbar">
           {/* Desktop Table View */}
           <div className="hidden md:block bg-white/5 border border-white/5 rounded-[4rem] overflow-hidden shadow-2xl">
             <table className="w-full text-left border-collapse">
@@ -254,10 +254,9 @@ const AdminContent: React.FC = () => {
             </table>
           </div>
 
-          {/* Mobile Card View */}
-          <div className="md:hidden space-y-4 pb-20 px-4">
+          <div className="md:hidden space-y-4 pb-24 px-1">
             {filteredAndSorted.map(item => (
-              <div key={item.id} className="p-4 bg-white/5 border border-white/10 rounded-2xl md:rounded-3xl space-y-4">
+              <div key={item.id} className="p-4 bg-white/5 border border-white/10 rounded-2xl md:rounded-3xl space-y-3">
                 <div className="flex gap-4">
                   <img src={item.thumbnailUrl || item.imageUrl} className="size-20 rounded-2xl object-cover shrink-0 border border-white/5" alt="" />
                   <div className="flex-1 min-w-0">
@@ -292,18 +291,18 @@ const AdminContent: React.FC = () => {
       {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-8 bg-black/95 backdrop-blur-3xl overflow-hidden">
-          <div className="relative w-full max-w-7xl bg-[#0c0c0c] border border-white/10 rounded-2xl md:rounded-[4rem] shadow-2xl flex flex-col max-h-[98vh] overflow-hidden animate-fadeIn">
-            <header className="px-6 md:px-10 py-6 md:py-8 border-b border-white/5 flex justify-between items-center bg-white/5 shrink-0">
+          <div className="relative w-full max-w-7xl bg-[#0c0c0c] border border-white/10 rounded-2xl md:rounded-[4rem] shadow-2xl flex flex-col h-[95vh] md:max-h-[98vh] overflow-hidden animate-fadeIn">
+            <header className="px-5 md:px-10 py-4 md:py-8 border-b border-white/5 flex justify-between items-center bg-white/5 shrink-0">
               <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-                <h2 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter">{editingId ? 'Recalibrate Signal' : 'Inject New Signal'}</h2>
+                <h2 className="text-lg md:text-2xl font-black uppercase italic tracking-tighter">{editingId ? 'Recalibrate Signal' : 'Inject New Signal'}</h2>
                 <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value as any })} className="bg-black/60 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-1.5 md:py-2 text-[8px] md:text-[10px] font-black uppercase tracking-widest outline-none focus:border-primary-blue text-white w-fit">
                   <option value="Published">Status: Published</option><option value="Draft">Status: Draft</option><option value="Archived">Status: Archived</option>
                 </select>
               </div>
-              <button onClick={() => setShowModal(false)} className="size-10 md:size-12 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center text-gray-500 hover:text-white transition-all shrink-0"><span className="material-symbols-outlined">close</span></button>
+              <button onClick={() => setShowModal(false)} className="size-8 md:size-12 rounded-lg md:rounded-2xl bg-white/5 flex items-center justify-center text-gray-500 hover:text-white transition-all shrink-0"><span className="material-symbols-outlined text-sm md:text-base">close</span></button>
             </header>
 
-            <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 md:space-y-12 no-scrollbar">
+            <div className="flex-1 overflow-y-auto p-5 md:p-10 space-y-6 md:space-y-12 no-scrollbar">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
                 <div className="md:col-span-8 space-y-6 md:space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
@@ -451,8 +450,8 @@ const AdminContent: React.FC = () => {
               </div>
             </div>
 
-            <footer className="p-6 md:p-10 border-t border-white/5 flex flex-col md:flex-row gap-4 bg-black shrink-0">
-              <button onClick={() => setShowModal(false)} className="py-4 md:py-6 bg-white/5 rounded-xl md:rounded-[2rem] font-black text-[10px] md:text-[11px] uppercase tracking-[0.4em] text-white hover:bg-white/10 transition-all md:order-1 order-2">Abort Ops</button>
+            <footer className="p-4 md:p-10 border-t border-white/5 flex flex-col md:flex-row gap-3 bg-black shrink-0">
+              <button onClick={() => setShowModal(false)} className="py-3 md:py-6 bg-white/5 rounded-xl md:rounded-[2rem] font-black text-[9px] md:text-[11px] uppercase tracking-[0.4em] text-white hover:bg-white/10 transition-all md:order-1 order-2">Abort Ops</button>
               <button
                 onClick={handleDeploy}
                 disabled={isSubmitting}

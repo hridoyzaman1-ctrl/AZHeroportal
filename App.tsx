@@ -12,6 +12,10 @@ import AdminUsers from './pages/AdminUsers';
 import AdminSubscribers from './pages/AdminSubscribers';
 import AdminCategories from './pages/AdminCategories';
 import AdminRankings from './pages/AdminRankings';
+import AdminComics from './pages/AdminComics';
+import ComicsGen from './pages/ComicsGen';
+import CreatorStudio from './pages/Comics/CreatorStudio';
+import ComicReader from './pages/Comics/Reader';
 import AdminSettings from './pages/AdminSettings';
 import AdminAuth from './pages/AdminAuth';
 import AdminProfile from './pages/AdminProfile';
@@ -168,7 +172,7 @@ const App: React.FC = () => {
   });
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [portalActivated, setPortalActivated] = useState(false);
+
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     try { return (localStorage.getItem('portal_theme') as any) || 'dark'; } catch { return 'dark'; }
   });
@@ -264,7 +268,7 @@ const App: React.FC = () => {
     setCurrentUser(null);
   };
 
-  if (loading || !portalActivated) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 overflow-hidden relative">
         {/* Cinematic Background Pulse */}
@@ -280,30 +284,10 @@ const App: React.FC = () => {
           </div>
 
           <div className="w-full space-y-6">
-            {loading ? (
-              <div className="flex flex-col items-center gap-4 py-10">
-                <div className="size-10 border-2 border-primary-red border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-red ml-2">Synchronizing Multiverse...</p>
-              </div>
-            ) : (
-              <button
-                onClick={() => {
-                  soundManager.unlockAudio(['themeDark']);
-                  soundManager.playThemeSwitch('dark');
-                  soundManager.playStartup();
-                  setPortalActivated(true);
-                  // Sound effects will end when App transitions, 
-                  // but we want the crackle to stay for the brief splash
-                  setTimeout(() => {
-                    soundManager.stopStartup();
-                  }, 1500);
-                }}
-                className="w-full group relative py-6 bg-white rounded-2xl overflow-hidden hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-primary-red/20"
-              >
-                <div className="absolute inset-0 bg-primary-red translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
-                <span className="relative z-10 text-black group-hover:text-white font-black text-xs uppercase tracking-[0.5em] ml-2">Initiate Neural Link</span>
-              </button>
-            )}
+            <div className="flex flex-col items-center gap-4 py-10">
+              <div className="size-10 border-2 border-primary-red border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-red ml-2">Synchronizing Multiverse...</p>
+            </div>
             <p className="text-[9px] font-bold text-gray-700 uppercase tracking-widest leading-loose">
               System Authorization Required <br /> Establish Connection to Proceed
             </p>
@@ -338,7 +322,10 @@ const App: React.FC = () => {
               <Route path="/trailers" element={<Trailers />} />
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/blog" element={<Blog />} />
-              <Route path="/rankings" element={<Rankings />} />
+              <Route path="/start" element={<Rankings />} />
+              <Route path="/comics-gen" element={<ComicsGen />} />
+              <Route path="/comics/create" element={<CreatorStudio />} />
+              <Route path="/comics/:id" element={<ComicReader />} />
               <Route path="/category/:type" element={<CategoryPage />} />
               <Route path="/news/:id" element={<NewsDetail />} />
               <Route path="/admin/auth" element={<AdminAuth />} />
@@ -349,6 +336,7 @@ const App: React.FC = () => {
               <Route path="/admin/subscribers" element={<PrivateRoute><AdminSubscribers /></PrivateRoute>} />
               <Route path="/admin/categories" element={<PrivateRoute><AdminCategories /></PrivateRoute>} />
               <Route path="/admin/rankings" element={<PrivateRoute><AdminRankings /></PrivateRoute>} />
+              <Route path="/admin/comics" element={<PrivateRoute><AdminComics /></PrivateRoute>} />
               <Route path="/admin/profile" element={<PrivateRoute><AdminProfile /></PrivateRoute>} />
               <Route path="/admin/settings" element={<PrivateRoute><AdminSettings /></PrivateRoute>} />
               <Route path="*" element={<Navigate to="/" replace />} />

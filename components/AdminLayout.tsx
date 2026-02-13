@@ -22,6 +22,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, subtitle }) 
         { path: '/admin/subscribers', icon: 'mail', label: 'Uplink Feed' },
         { path: '/admin/categories', icon: 'category', label: 'Grid Sectors' },
         { path: '/admin/rankings', icon: 'trophy', label: 'Neural Rankings' },
+        { path: '/admin/comics', icon: 'auto_stories', label: 'Comics Gen' },
         { path: '/admin/profile', icon: 'account_circle', label: 'Operative Profile' },
         { path: '/admin/settings', icon: 'settings', label: 'Core Settings' },
     ];
@@ -108,8 +109,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, subtitle }) 
             {/* MAIN CONTENT FIELD */}
             <main className="flex-1 flex flex-col overflow-hidden relative w-full">
                 {/* GLOBAL ANALYTIC HEADER */}
-                <header className="bg-[#0a0f1a]/80 backdrop-blur-3xl border-b border-white/5 px-4 md:px-10 py-3 md:py-8 flex items-center justify-between z-[40] shrink-0">
-                    <div className="flex items-center gap-4 md:gap-8 overflow-hidden">
+                <header className="bg-[#0a0f1a]/80 backdrop-blur-3xl border-b border-white/5 px-3 md:px-10 py-3 md:py-8 flex items-center justify-between z-[40] shrink-0">
+                    <div className="flex items-center gap-3 md:gap-8 overflow-hidden">
                         {/* Mobile Menu Toggle */}
                         <button
                             onClick={() => setIsSidebarOpen(true)}
@@ -128,7 +129,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, subtitle }) 
                         <div className="hidden sm:block h-6 w-px bg-white/5"></div>
                         <div className="truncate">
                             <span className="text-primary-blue text-[7px] md:text-[9px] font-black uppercase tracking-[0.4em] mb-0.5 block opacity-60 truncate">{subtitle || 'OPERATIONAL ACCESS'}</span>
-                            <h1 className="text-base md:text-2xl font-black italic uppercase tracking-tighter leading-none truncate">
+                            <h1 className="text-sm md:text-2xl font-black italic uppercase tracking-tighter leading-none truncate">
                                 {title?.split(' ')[0] || 'ADMIN'} <span className="text-primary-blue">{title?.split(' ').slice(1).join(' ') || 'COMMAND'}</span>
                             </h1>
                         </div>

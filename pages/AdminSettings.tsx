@@ -53,12 +53,12 @@ const AdminSettings: React.FC = () => {
   const platforms: ('Facebook' | 'WhatsApp' | 'YouTube' | 'X' | 'TikTok')[] = ['Facebook', 'WhatsApp', 'YouTube', 'X', 'TikTok'];
 
   return (
-    <AdminLayout title="PORTAL SETTINGS" subtitle="Global Grid Config">
-      <div className="flex-1 flex flex-col bg-[#0a0f1a] overflow-hidden h-full">
-        <div className="flex-1 overflow-y-auto p-12 space-y-12 no-scrollbar max-w-4xl mx-auto w-full">
+    <AdminLayout title="SYSTEM REGISTRY" subtitle="Core Protocol Management">
+      <div className="flex-1 p-4 md:p-12 space-y-6 md:space-y-12 overflow-y-auto no-scrollbar">
+        <div className="max-w-5xl mx-auto space-y-6 md:space-y-10">
 
           {/* Neural Address & Contact */}
-          <section className="space-y-8 bg-white/5 p-10 rounded-[3rem] border border-white/10">
+          <section className="bg-white/5 border border-white/5 rounded-3xl md:rounded-[3rem] p-6 md:p-12 space-y-8 md:space-y-12 shadow-2xl">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-black uppercase italic tracking-tighter">Identity & Location</h2>
               <div className="flex items-center gap-3">

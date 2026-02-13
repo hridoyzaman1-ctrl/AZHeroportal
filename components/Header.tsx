@@ -65,6 +65,9 @@ const Header: React.FC = () => {
                   {cat}
                 </Link>
               ))}
+              <Link to="/comics-gen" className={`text-[11px] font-black uppercase tracking-widest transition-all hover:text-primary-red ${location.pathname.includes('comics') ? 'text-primary-red' : typeof theme !== 'undefined' && theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                Comics Gen
+              </Link>
             </nav>
           </div>
 

@@ -65,19 +65,19 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <AdminLayout title="COMMAND HQ" subtitle="Neural Grid Analytics">
-      <div className="flex-1 p-6 md:p-12 space-y-6 md:space-y-12">
+      <div className="flex-1 p-4 md:p-12 space-y-6 md:space-y-12">
         {/* STATS GRID */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <section className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
           {[
             { l: 'Vault Signals', v: stats.totalSignals, i: 'rss_feed', c: 'text-primary-blue' },
             { l: 'Total Views', v: stats.totalViews.toLocaleString(), i: 'visibility', c: 'text-green-500' },
             { l: 'Engagements', v: stats.totalEngagements, i: 'bolt', c: 'text-primary-red' },
             { l: 'Avg Rating', v: stats.avgRating.toFixed(1), i: 'star', c: 'text-yellow-500' }
           ].map((s, i) => (
-            <div key={i} className="p-6 md:p-10 bg-white/5 border border-white/10 rounded-3xl md:rounded-[3rem] group hover:bg-white/10 transition-all shadow-2xl">
-              <span className={`material-symbols-outlined text-2xl md:text-3xl ${s.c} mb-4 md:mb-6 block`}>{s.i}</span>
-              <p className="text-gray-500 text-[8px] md:text-[10px] font-black uppercase tracking-widest mb-1 md:mb-2">{s.l}</p>
-              <p className="text-2xl md:text-4xl font-black italic tracking-tighter">{s.v}</p>
+            <div key={i} className="p-4 md:p-10 bg-white/5 border border-white/10 rounded-2xl md:rounded-[3rem] group hover:bg-white/10 transition-all shadow-2xl">
+              <span className={`material-symbols-outlined text-xl md:text-3xl ${s.c} mb-3 md:mb-6 block`}>{s.i}</span>
+              <p className="text-gray-500 text-[7px] md:text-[10px] font-black uppercase tracking-widest mb-1 md:mb-2">{s.l}</p>
+              <p className="text-xl md:text-4xl font-black italic tracking-tighter">{s.v}</p>
             </div>
           ))}
         </section>
@@ -86,7 +86,7 @@ const AdminDashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
           <div className="lg:col-span-8 p-6 md:p-12 bg-white/5 border border-white/10 rounded-3xl md:rounded-[4rem] shadow-2xl">
             <h3 className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-gray-500 mb-8 md:mb-12">Engagement Matrix</h3>
-            <div className="h-64 md:h-96">
+            <div className="h-56 md:h-96">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData}>
                   <defs>
@@ -100,9 +100,9 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="lg:col-span-4 p-12 bg-white/5 border border-white/10 rounded-[4rem] shadow-2xl flex flex-col items-center">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 mb-10">Sector Volume</h3>
-            <div className="h-64 w-full">
+          <div className="lg:col-span-4 p-8 md:p-12 bg-white/5 border border-white/10 rounded-3xl md:rounded-[4rem] shadow-2xl flex flex-col items-center">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 mb-6 md:mb-10 text-center">Sector Volume</h3>
+            <div className="h-48 md:h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={10} dataKey="value">

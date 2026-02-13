@@ -77,7 +77,7 @@ const AdminComments: React.FC = () => {
     <AdminLayout title="REVIEW CONTROL" subtitle="Reader Intel Moderation">
       <div className="flex-1 flex flex-col min-w-0 bg-[#0a0f1a] h-full overflow-hidden">
         {/* Advanced Filters */}
-        <div className="px-6 md:px-12 py-8 border-b border-white/5 flex flex-col lg:flex-row gap-6 bg-black/20">
+        <div className="px-4 md:px-12 py-6 md:py-8 border-b border-white/5 flex flex-col lg:flex-row gap-4 md:gap-6 bg-black/20">
           <div className="relative flex-1">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-sm">search</span>
             <input
@@ -101,12 +101,12 @@ const AdminComments: React.FC = () => {
               ))}
             </select>
 
-            <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
+            <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 w-full sm:w-auto overflow-x-auto no-scrollbar">
               {(['all', 'today', 'week'] as const).map((f) => (
                 <button
                   key={f}
                   onClick={() => setTimeFilter(f)}
-                  className={`px-4 py-2 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all ${timeFilter === f ? 'bg-primary-blue text-black' : 'text-gray-500 hover:text-white'}`}
+                  className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all ${timeFilter === f ? 'bg-primary-blue text-black' : 'text-gray-500 hover:text-white'}`}
                 >
                   {f}
                 </button>
@@ -124,7 +124,8 @@ const AdminComments: React.FC = () => {
 
           {displayComments.length > 0 ? (
             <div className="space-y-6">
-              <div className="bg-white/5 border border-white/5 rounded-3xl md:rounded-[3rem] overflow-hidden shadow-2xl overflow-x-auto">
+              {/* Desktop Table View */}
+              <div className="hidden md:block bg-white/5 border border-white/5 rounded-3xl md:rounded-[3rem] overflow-hidden shadow-2xl overflow-x-auto">
                 <table className="w-full text-left border-collapse min-w-[800px]">
                   <thead className="bg-white/5 text-[9px] font-black uppercase tracking-[0.2em] text-gray-500 border-b border-white/5">
                     <tr>
@@ -181,6 +182,46 @@ const AdminComments: React.FC = () => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-4 pb-20">
+                {displayComments.map(comment => (
+                  <div key={comment.id} className={`p-4 bg-white/5 border border-white/10 rounded-2xl space-y-4 ${!comment.isVisible ? 'opacity-40' : ''}`}>
+                    <div className="flex gap-4">
+                      <img src={comment.avatar} className="size-16 rounded-2xl border border-white/10 object-cover shrink-0" alt="" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="text-sm font-black uppercase italic text-white truncate">{comment.author}</p>
+                          <div className={`px-2 py-0.5 rounded-lg border text-[7px] font-black uppercase ${comment.userScore >= 8 ? 'bg-green-500/10 border-green-500/30 text-green-500' : comment.userScore >= 5 ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500' : 'bg-primary-red/10 border-primary-red/30 text-primary-red'}`}>
+                            {comment.userScore} Pts
+                          </div>
+                        </div>
+                        <p className="text-[9px] text-primary-blue font-bold tracking-widest lowercase truncate mb-1">{comment.email || 'NO EMAIL'}</p>
+                        <p className="text-[8px] font-bold text-gray-600 uppercase truncate">On: {comment.articleTitle}</p>
+                      </div>
+                    </div>
+                    <div className="bg-black/40 p-4 rounded-xl border border-white/5">
+                      <p className="text-xs text-gray-300 leading-relaxed italic">"{comment.text}"</p>
+                      <p className="text-[8px] font-black text-gray-700 uppercase mt-2">{comment.date}</p>
+                    </div>
+                    <div className="flex gap-2 pt-2 border-t border-white/5">
+                      <button
+                        onClick={() => handleToggle(comment.articleId, comment.id)}
+                        className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all ${comment.isVisible ? 'bg-white/5 text-gray-500' : 'bg-primary-blue text-black'}`}
+                      >
+                        <span className="material-symbols-outlined text-sm">{comment.isVisible ? 'visibility_off' : 'visibility'}</span>
+                        {comment.isVisible ? 'Censor' : 'Restore'}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(comment.articleId, comment.id)}
+                        className="px-4 bg-white/5 text-gray-500 hover:text-primary-red rounded-xl transition-all"
+                      >
+                        <span className="material-symbols-outlined text-sm">delete_forever</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
 
               {filtered.length > visibleCount && (

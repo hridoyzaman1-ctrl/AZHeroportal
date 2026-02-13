@@ -71,7 +71,7 @@ const AdminRankings: React.FC = () => {
   return (
     <AdminLayout title="RANKING COMMAND" subtitle="Epic Content Curation">
       <div className="flex flex-col bg-[#0a0f1a] h-full overflow-hidden uppercase">
-        <div className="flex-1 p-6 md:p-12 space-y-6 md:space-y-12 overflow-y-auto no-scrollbar">
+        <div className="flex-1 p-4 md:p-12 space-y-6 md:space-y-12 overflow-y-auto no-scrollbar">
           {!editingList && (
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-0">
               <div className="md:block hidden">
@@ -202,12 +202,12 @@ const AdminRankings: React.FC = () => {
                           await storageService.saveRankingLists(updated);
                         }
                       }}
-                      className="text-gray-600 hover:text-primary-red material-symbols-outlined opacity-0 group-hover:opacity-100 transition-all"
+                      className="text-gray-600 hover:text-primary-red material-symbols-outlined md:opacity-0 group-hover:opacity-100 transition-all p-2"
                     >
                       delete
                     </button>
                   </div>
-                  <h3 className="text-2xl font-black uppercase italic tracking-tighter leading-tight">{list.title}</h3>
+                  <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter leading-tight">{list.title}</h3>
                   <div className="flex items-center gap-3 text-gray-500">
                     <span className="material-symbols-outlined text-sm">analytics</span>
                     <p className="text-[10px] font-bold uppercase tracking-widest">{list.items.length} signals tracked</p>

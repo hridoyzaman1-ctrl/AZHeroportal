@@ -22,8 +22,48 @@ const COLLECTIONS = {
   CATEGORIES: 'categories',
   RANKINGS: 'rankings',
   SETTINGS: 'settings',
-  SUBSCRIBERS: 'subscribers'
+  SUBSCRIBERS: 'subscribers',
+  COMICS: 'comics'
 };
+
+export interface ComicPanel {
+  imageUrl: string;
+  prompt: string;
+  dialogue?: string;
+  characterId?: string;
+}
+
+export interface ComicPage {
+  layout: '1x1' | '2x2' | '3x3' | 'custom';
+  environment?: string; // e.g., "Gotham City Rooftop at Night"
+  panels: ComicPanel[];
+}
+
+export interface Character {
+  id: string;
+  name: string;
+  description: string;
+  designPrompt: string;
+  referenceImage?: string;
+}
+
+export interface ComicEntry {
+  id: string;
+  title: string;
+  authorId: string;
+  authorName: string;
+  createdAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+  isShowcased: boolean;
+  badge: '1st' | '2nd' | '3rd' | null;
+  pages: ComicPage[];
+  characters: Character[];
+  style: string;
+  storyPremise: string;
+  coverImage: string; // First panel of first page usually
+  pdfUrl?: string; // If uploaded
+  type: 'generated' | 'uploaded';
+}
 
 export const storageService = {
   // Users
@@ -247,5 +287,35 @@ export const storageService = {
     for (const list of lists) {
       await setDoc(doc(db, COLLECTIONS.RANKINGS, list.id), list);
     }
+  },
+
+  // Comics
+  getComics: async (): Promise<ComicEntry[]> => {
+    const q = query(collection(db, COLLECTIONS.COMICS), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ComicEntry));
+  },
+
+  addComic: async (comic: ComicEntry) => {
+    await setDoc(doc(db, COLLECTIONS.COMICS, comic.id), comic);
+    return comic;
+  },
+
+  updateComicStatus: async (id: string, status: 'pending' | 'approved' | 'rejected') => {
+    await updateDoc(doc(db, COLLECTIONS.COMICS, id), { status });
+    return storageService.getComics();
+  },
+
+  updateComicShowcase: async (id: string, isShowcased: boolean) => {
+    await updateDoc(doc(db, COLLECTIONS.COMICS, id), { isShowcased });
+  },
+
+  updateComicBadge: async (id: string, badge: '1st' | '2nd' | '3rd' | null) => {
+    await updateDoc(doc(db, COLLECTIONS.COMICS, id), { badge });
+  },
+
+  deleteComic: async (id: string) => {
+    await deleteDoc(doc(db, COLLECTIONS.COMICS, id));
+    return storageService.getComics();
   }
 };
