@@ -22,10 +22,14 @@ const LAYOUTS = [
 ];
 
 // Helper to generate image URL
-const generateImageUrl = (prompt: string, width = 1024, height = 1024) => {
-    const fullPrompt = encodeURIComponent(prompt);
+const generateImageUrl = (prompt: string, width = 512, height = 512) => {
+    if (!prompt) return '';
+    const cleanPrompt = prompt.replace(/,+/g, ',').replace(/\s+/g, ' ').trim();
+    const fullPrompt = encodeURIComponent(cleanPrompt);
     const seed = Math.floor(Math.random() * 1000000);
-    return `https://image.pollinations.ai/prompt/${fullPrompt}?width=${width}&height=${height}&seed=${seed}&nologo=true`;
+    const url = `https://image.pollinations.ai/prompt/${fullPrompt}?width=${width}&height=${height}&seed=${seed}&nologo=true`;
+    console.log("🎨 AI Imagine Request (Simplified):", url);
+    return url;
 };
 
 const CreatorStudio: React.FC = () => {
@@ -84,7 +88,8 @@ const CreatorStudio: React.FC = () => {
             finalPrompt += `, featuring ${characters.map(c => `${c.name} (${c.description})`).join(', ')}`;
         }
 
-        const url = generateImageUrl(finalPrompt, 768, 1152); // Portrait ratio for cover - reduced for speed
+        const url = generateImageUrl(finalPrompt, 512, 768);
+        console.log("🎬 Cover Prompt Generated:", finalPrompt);
         setCoverImage(url);
     };
 
@@ -299,8 +304,12 @@ const CreatorStudio: React.FC = () => {
                                         src={coverImage}
                                         alt="Cover"
                                         className="w-full h-full object-cover shadow-[0_0_50px_rgba(0,0,0,0.5)]"
-                                        onLoad={() => setIsGeneratingCover(false)}
-                                        onError={() => {
+                                        onLoad={() => {
+                                            console.log("✅ Cover Loaded Success");
+                                            setIsGeneratingCover(false);
+                                        }}
+                                        onError={(e) => {
+                                            console.error("❌ Cover Load Failed:", e.currentTarget.src);
                                             setCoverError(true);
                                             setIsGeneratingCover(false);
                                         }}

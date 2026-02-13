@@ -1,0 +1,16 @@
+﻿{
+  "status": "success",
+  "result": [
+    {
+      "projectId": "flutter-ai-playground-76ba0",
+      "projectNumber": "271094869208",
+      "displayName": "DAVALA",
+      "name": "projects/flutter-ai-playground-76ba0",
+      "resources": {
+        "hostingSite": "flutter-ai-playground-76ba0"
+      },
+      "state": "ACTIVE",
+      "etag": "1_e48bbe0f-9c2d-469b-850b-6269595132f9"
+    }
+  ]
+}
