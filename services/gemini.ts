@@ -58,9 +58,13 @@ export const geminiService = {
         safetySettings
       });
 
-      const result = await model.generateContent(prompt);
+      const result = await model.generateContent(prompt).catch(e => {
+        console.error("🎨 [service] RAW API ERROR:", e);
+        throw e;
+      });
       const response = result.response;
 
+      console.log("🎨 [service] Full API Response Object:", JSON.stringify(response, null, 2));
       console.log("🎨 [service] API Response received status:", response.promptFeedback?.blockReason || "NOT BLOCKED");
 
       if (response.promptFeedback?.blockReason) {
@@ -84,7 +88,7 @@ export const geminiService = {
       console.error("🎨 [service] No image data in response candidate:", JSON.stringify(candidate, null, 2));
       throw new Error("No image data found in response");
     } catch (error: any) {
-      console.error("🎨 [service] Image generation error:", error.message || error);
+      console.error("🎨 [service] Image generation error summary:", error.message || error);
       throw error;
     }
   }
