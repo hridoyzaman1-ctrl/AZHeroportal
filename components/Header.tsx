@@ -32,8 +32,8 @@ const Header: React.FC = () => {
 
   // Use dynamic categories from context, limited to first 6 for header to prevent overflow
   // The rest can be accessed via Mobile Menu or a "More" dropdown (future)
-  // We filter out 'Trailers' and 'Reviews' as they have dedicated nav buttons/sections usually
-  const visibleCategories = categories.slice(0, 6);
+  // We filter out 'Blog', 'Trailers' and 'Reviews' as they have dedicated nav buttons/sections
+  const visibleCategories = categories.filter(c => c !== 'Blog').slice(0, 6);
 
   const getCategoryLink = (cat: string) => {
     if (cat === 'Blog') return '/blog';
@@ -185,7 +185,7 @@ const Header: React.FC = () => {
               <h3 className={`text-[9px] font-black uppercase tracking-[0.2em] ${theme === 'dark' ? 'text-gray-500' : 'text-slate-400'}`}>Signals</h3>
               <div className="flex flex-col space-y-2">
                 <div className="flex flex-col space-y-2">
-                  {categories.map(cat => (
+                  {categories.filter(c => c !== 'Blog').map(cat => (
                     <Link
                       key={cat}
                       to={getCategoryLink(cat)}

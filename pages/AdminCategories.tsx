@@ -50,7 +50,7 @@ const AdminCategories: React.FC = () => {
 
             <div className="grid grid-cols-1 gap-4">
               {categories.map((cat, idx) => {
-                const isProtected = ['Movies', 'Games', 'Comics', 'DC', 'Marvel', 'Blog', 'Reviews', 'Trailers'].includes(cat);
+                const isProtected = ['Movies', 'Games', 'Comics', 'DC', 'Marvel'].includes(cat);
                 return (
                   <div key={cat} className="flex justify-between items-center p-4 md:p-6 bg-white/5 border border-white/5 rounded-2xl md:rounded-3xl group transition-all hover:bg-white/10">
                     <span className="text-xs md:text-sm font-black uppercase tracking-widest flex items-center gap-3 md:gap-4">

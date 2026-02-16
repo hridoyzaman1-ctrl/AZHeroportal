@@ -122,7 +122,7 @@ export const storageService = {
     if (docSnapshot.exists()) {
       return docSnapshot.data().list;
     }
-    return ['Movies', 'Games', 'Comics', 'DC', 'Marvel', 'Blog', 'Reviews', 'Trailers', 'Rumors', 'Indie', 'Tech'];
+    return ['Games', 'Movies', 'Comics', 'DC', 'Marvel', 'Rumors', 'Indie', 'Tech'];
   },
 
   saveCategories: async (cats: Category[]) => {
@@ -140,7 +140,7 @@ export const storageService = {
   },
 
   deleteCategory: async (cat: string) => {
-    const PROTECTED = ['Movies', 'Games', 'Comics', 'DC', 'Marvel', 'Blog', 'Reviews', 'Trailers'];
+    const PROTECTED = ['Movies', 'Games', 'Comics', 'DC', 'Marvel'];
     if (PROTECTED.includes(cat)) {
       return storageService.getCategories();
     }

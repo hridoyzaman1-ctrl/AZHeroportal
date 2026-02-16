@@ -138,7 +138,7 @@ const Home: React.FC = () => {
             >
               {heroItems.map((item, idx) => (
                 <div key={item.id} className={`absolute inset-0 transition-all duration-[1.5s] ease-in-out ${idx === heroIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110 pointer-events-none'}`}>
-                  <img src={item.imageUrl} className="w-full h-full object-cover" alt="" />
+                  <img src={item.imageUrl || item.thumbnailUrl} className="w-full h-full object-cover" alt="" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
 
                   <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full md:w-3/4 animate-fadeIn">

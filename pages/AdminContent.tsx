@@ -320,6 +320,33 @@ const AdminContent: React.FC = () => {
                     </div>
                   </div>
 
+                  <div className="space-y-4">
+                    <label className="text-[8px] font-black uppercase text-gray-500 tracking-widest px-2">Sub-Categories (Select All That Apply)</label>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                      {['Games', 'Movies', 'Comics', 'DC', 'Marvel'].map(cat => (
+                        <label key={cat} className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${formData.categories?.includes(cat) ? 'bg-primary-blue/10 border-primary-blue/30 text-primary-blue' : 'bg-black/40 border-white/5 text-gray-500 hover:border-white/10'}`}>
+                          <span className="text-[10px] font-black uppercase tracking-widest">{cat}</span>
+                          <input
+                            type="checkbox"
+                            className="hidden"
+                            checked={formData.categories?.includes(cat)}
+                            onChange={(e) => {
+                              const current = formData.categories || [];
+                              if (e.target.checked) {
+                                setFormData({ ...formData, categories: [...current, cat] });
+                              } else {
+                                setFormData({ ...formData, categories: current.filter(c => c !== cat) });
+                              }
+                            }}
+                          />
+                          <span className="material-symbols-outlined text-sm">
+                            {formData.categories?.includes(cat) ? 'check_circle' : 'circle'}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <label className="text-[8px] font-black uppercase text-gray-500 tracking-widest px-2">Headline</label>
                     <input type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-black/60 border border-white/10 rounded-xl md:rounded-2xl p-4 md:p-5 text-sm md:text-lg font-black uppercase italic text-white outline-none focus:border-primary-blue" placeholder="Broadcast Headline..." />
