@@ -90,23 +90,26 @@ const CreatorStudio: React.FC = () => {
     const generateCover = async () => {
         setIsGeneratingCover(true);
         setCoverError(false);
+        console.log("🎬 Starting generateCover...");
         try {
             let finalPrompt = `Comic Book Cover for "${title}": ${storyPremise}, ${coverAction}, ${selectedStyle.prompt}, detailed masterpiece, 8k resolution`;
 
             if (coverEnvironment) finalPrompt += `, setting: ${coverEnvironment}`;
 
-            // Add character context if selected (optional implementation, for now generic)
             if (characters.length > 0) {
-                finalPrompt += `, featuring ${characters.map(c => `${c.name} (${c.description})`).join(', ')}`;
+                finalPrompt += `, featuring ${characters.map(c => `${c.name}`).join(', ')}`;
             }
 
+            console.log("🎬 finalPrompt:", finalPrompt);
             const imageData = await generateImage(finalPrompt, 512, 768);
-            console.log("🎬 Cover Generated Successfully");
+            console.log("🎬 Cover Generated Successfully (data received)");
             setCoverImage(imageData);
         } catch (error) {
+            console.error("🎬 Cover Generation caught error:", error);
             setCoverError(true);
         } finally {
             setIsGeneratingCover(false);
+            console.log("🎬 generateCover finished (loading=false)");
         }
     };
 
@@ -320,25 +323,11 @@ const CreatorStudio: React.FC = () => {
                             </div>
 
                             <div className="relative aspect-[2/3] bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex items-center justify-center">
-                                {coverImage && !coverError ? (
-                                    <img
-                                        src={coverImage}
-                                        alt="Cover"
-                                        className="w-full h-full object-cover shadow-[0_0_50px_rgba(0,0,0,0.5)]"
-                                        onLoad={() => {
-                                            console.log("✅ Cover Loaded Success");
-                                            setIsGeneratingCover(false);
-                                        }}
-                                        onError={(e) => {
-                                            console.error("❌ Cover Load Failed:", e.currentTarget.src);
-                                            setCoverError(true);
-                                            setIsGeneratingCover(false);
-                                        }}
-                                    />
-                                ) : coverImage && coverError ? (
+                                {coverError ? (
                                     <div className="text-center p-8 bg-black/50 w-full h-full flex flex-col items-center justify-center gap-4">
                                         <span className="material-symbols-outlined text-4xl text-primary-red">error</span>
                                         <p className="text-xs font-bold text-gray-400 uppercase">Image generation failed</p>
+                                        <p className="text-[10px] text-gray-500 max-w-[200px]">The prompt may have been blocked or the service is temporarily unavailable.</p>
                                         <button
                                             onClick={generateCover}
                                             className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-xs font-bold uppercase transition-colors"
@@ -346,6 +335,21 @@ const CreatorStudio: React.FC = () => {
                                             Try Again
                                         </button>
                                     </div>
+                                ) : coverImage ? (
+                                    <img
+                                        src={coverImage}
+                                        alt="Cover"
+                                        className="w-full h-full object-cover shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+                                        onLoad={() => {
+                                            console.log("✅ Cover Image Element Loaded");
+                                            setIsGeneratingCover(false);
+                                        }}
+                                        onError={(e) => {
+                                            console.error("❌ Cover Image Element Load Failed:", e.currentTarget.src.substring(0, 100));
+                                            setCoverError(true);
+                                            setIsGeneratingCover(false);
+                                        }}
+                                    />
                                 ) : (
                                     <div className="text-center p-8 opacity-50">
                                         <span className="material-symbols-outlined text-6xl mb-4">auto_stories</span>
