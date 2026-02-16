@@ -1,8 +1,6 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-import { GoogleGenAI } from "@google/genai";
-
-const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
-const genAI = new GoogleGenAI({ apiKey });
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GOOGLE_AI_API_KEY);
 
 export const geminiService = {
   async generateSummary(text: string) {
@@ -16,44 +14,41 @@ export const geminiService = {
     }
   },
 
-  async suggestRankings(category: string) {
+  async suggestRankings(currentComics: any[]) {
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const result = await model.generateContent(`Suggest a Top 10 list for ${category} in 2024. Provide just the titles as a list.`);
-      return result.response.text();
+      const result = await model.generateContent(`Given these comics: ${JSON.stringify(currentComics)}, suggest a top 10 ranking based on popularity and quality. Return only a JSON array of IDs.`);
+      return JSON.parse(result.response.text());
     } catch (error) {
       console.error("Gemini ranking error:", error);
-      return "No suggestions available.";
+      return [];
     }
   },
 
   async generateImage(prompt: string) {
     try {
-      // Note: As of the latest @google/genai SDK, Imagen 3 support might vary by region/API availability.
-      // We use the specific imagen model name.
+      console.log("🎨 Starting image generation for prompt:", prompt);
+      // For Imagen in AI Studio, we use the specific model name.
       const model = genAI.getGenerativeModel({ model: "imagen-3.0-generate-001" });
 
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }]
-      });
-
+      const result = await model.generateContent(prompt);
       const response = result.response;
-      // Imagen usually returns the image in a specific format in the response
-      // For the web SDK, this often comes as a base64 string or a blob depending on the implementation.
-      // However, if the SDK doesn't directly support Imagen 3 yet in a simple way, 
-      // we might need to use the REST API. But let's try the SDK first.
 
-      // Based on typical Imagen 3 API responses:
+      console.log("🎨 API Response received:", JSON.stringify(response, null, 2));
+
+      // In @google/generative-ai, image responses come as parts with inlineData
       const candidate = response.candidates?.[0];
       const imagePart = candidate?.content?.parts?.find(part => part.inlineData?.mimeType?.startsWith('image/'));
 
       if (imagePart?.inlineData?.data) {
+        console.log("🎨 Image data found in response!");
         return `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
       }
 
+      console.error("🎨 No image data in response candidate:", candidate);
       throw new Error("No image data found in response");
-    } catch (error) {
-      console.error("Gemini image generation error:", error);
+    } catch (error: any) {
+      console.error("Gemini image generation error detail:", error);
       throw error;
     }
   }
