@@ -31,19 +31,9 @@ const Comics: React.FC = () => {
                         The <span className="text-primary-red">Multiverse</span> Gallery
                     </h1>
                     <p className="text-xl text-gray-400 max-w-xl">
-                        Explore thousands of unique stories created by our community or forge your own destiny in the Creator Studio.
+                        Explore thousands of unique stories from across the multiverse.
                     </p>
                 </div>
-                <button
-                    onClick={() => navigate('/comics/create')}
-                    className="group relative px-8 py-4 bg-primary-red text-white font-black uppercase tracking-widest text-lg overflow-hidden rounded-xl hover:scale-105 transition-transform"
-                >
-                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform"></div>
-                    <span className="relative flex items-center gap-2">
-                        <span className="material-symbols-outlined">edit_square</span>
-                        Create Comic
-                    </span>
-                </button>
             </div>
 
             {/* SHOWCASE SECTION */}
@@ -90,8 +80,8 @@ const ComicCard: React.FC<{ comic: ComicEntry; onClick: () => void }> = ({ comic
                 {/* BADGE */}
                 {comic.badge && (
                     <div className={`absolute top-2 left-2 px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest shadow-lg ${comic.badge === '1st' ? 'bg-yellow-400 text-black' :
-                            comic.badge === '2nd' ? 'bg-gray-300 text-black' :
-                                'bg-orange-700 text-white'
+                        comic.badge === '2nd' ? 'bg-gray-300 text-black' :
+                            'bg-orange-700 text-white'
                         }`}>
                         #{comic.badge} Place
                     </div>

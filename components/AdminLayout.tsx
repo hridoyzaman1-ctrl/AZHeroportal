@@ -22,7 +22,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, subtitle }) 
         { path: '/admin/subscribers', icon: 'mail', label: 'Uplink Feed' },
         { path: '/admin/categories', icon: 'category', label: 'Grid Sectors' },
         { path: '/admin/rankings', icon: 'trophy', label: 'Neural Rankings' },
-        { path: '/admin/comics', icon: 'auto_stories', label: 'Comics Gen' },
+        { path: '/admin/comics', icon: 'auto_stories', label: 'Comics Gallery' },
         { path: '/admin/profile', icon: 'account_circle', label: 'Operative Profile' },
         { path: '/admin/settings', icon: 'settings', label: 'Core Settings' },
     ];

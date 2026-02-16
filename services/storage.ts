@@ -26,6 +26,9 @@ const COLLECTIONS = {
   COMICS: 'comics'
 };
 
+import { storage } from './firebase';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+
 export interface ComicPanel {
   imageUrl: string;
   prompt: string;
@@ -317,5 +320,11 @@ export const storageService = {
   deleteComic: async (id: string) => {
     await deleteDoc(doc(db, COLLECTIONS.COMICS, id));
     return storageService.getComics();
+  },
+
+  uploadFile: async (file: File, path: string): Promise<string> => {
+    const storageRef = ref(storage, path);
+    const uploadTask = await uploadBytesResumable(storageRef, file);
+    return await getDownloadURL(uploadTask.ref);
   }
 };

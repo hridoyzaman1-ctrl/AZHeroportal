@@ -32,8 +32,8 @@ const Header: React.FC = () => {
 
   // Use dynamic categories from context, limited to first 6 for header to prevent overflow
   // The rest can be accessed via Mobile Menu or a "More" dropdown (future)
-  // We filter out 'Blog', 'Trailers' and 'Reviews' as they have dedicated nav buttons/sections
-  const visibleCategories = categories.filter(c => c !== 'Blog').slice(0, 6);
+  // We filter out 'Blog', 'Trailers', 'Reviews', and 'Comics' (has own page)
+  const visibleCategories = categories.filter(c => !['Blog', 'Comics'].includes(c)).slice(0, 6);
 
   const getCategoryLink = (cat: string) => {
     if (cat === 'Blog') return '/blog';
@@ -65,8 +65,8 @@ const Header: React.FC = () => {
                   {cat}
                 </Link>
               ))}
-              <Link to="/comics-gen" className={`text-[11px] font-black uppercase tracking-widest transition-all hover:text-primary-red ${location.pathname.includes('comics') ? 'text-primary-red' : typeof theme !== 'undefined' && theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                Comics Gen
+              <Link to="/comics" className={`text-[11px] font-black uppercase tracking-widest transition-all hover:text-primary-red ${location.pathname.includes('comics') ? 'text-primary-red' : typeof theme !== 'undefined' && theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                Comics
               </Link>
             </nav>
           </div>
@@ -177,6 +177,9 @@ const Header: React.FC = () => {
                 <Link to="/blog" className={`flex items-center gap-2 p-3 rounded-xl text-[10px] font-bold uppercase tracking-wider ${theme === 'dark' ? 'bg-white/5 text-gray-300' : 'bg-slate-50 text-slate-600'}`}>
                   <span className="material-symbols-outlined text-sm">draw</span> Blog
                 </Link>
+                <Link to="/comics" className={`flex items-center gap-2 p-3 rounded-xl text-[10px] font-bold uppercase tracking-wider ${theme === 'dark' ? 'bg-white/5 text-gray-300' : 'bg-slate-50 text-slate-600'}`}>
+                  <span className="material-symbols-outlined text-sm">menu_book</span> Comics
+                </Link>
               </div>
             </div>
 
@@ -185,7 +188,7 @@ const Header: React.FC = () => {
               <h3 className={`text-[9px] font-black uppercase tracking-[0.2em] ${theme === 'dark' ? 'text-gray-500' : 'text-slate-400'}`}>Signals</h3>
               <div className="flex flex-col space-y-2">
                 <div className="flex flex-col space-y-2">
-                  {categories.filter(c => c !== 'Blog').map(cat => (
+                  {categories.filter(c => !['Blog', 'Comics'].includes(c)).map(cat => (
                     <Link
                       key={cat}
                       to={getCategoryLink(cat)}

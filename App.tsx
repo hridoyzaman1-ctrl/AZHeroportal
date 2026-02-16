@@ -13,8 +13,7 @@ import AdminSubscribers from './pages/AdminSubscribers';
 import AdminCategories from './pages/AdminCategories';
 import AdminRankings from './pages/AdminRankings';
 import AdminComics from './pages/AdminComics';
-import ComicsGen from './pages/ComicsGen';
-import CreatorStudio from './pages/Comics/CreatorStudio';
+import Comics from './pages/Comics';
 import ComicReader from './pages/Comics/Reader';
 import AdminSettings from './pages/AdminSettings';
 import AdminAuth from './pages/AdminAuth';
@@ -55,20 +54,35 @@ export const useContent = () => {
   return context;
 };
 
-const Navigation: React.FC = () => {
+
+const Navigation: React.FC<{ isCollapsed: boolean; toggleSidebar: () => void }> = ({ isCollapsed, toggleSidebar }) => {
   const location = useLocation();
   const { theme, toggleTheme } = useContent();
   const isAdminRoute = location.pathname.startsWith('/admin');
   if (isAdminRoute) return null;
 
   return (
-    <aside className="hidden md:flex fixed left-0 top-0 h-screen w-64 flex-col border-r border-slate-200 dark:border-white/5 bg-white dark:bg-background-black z-50 p-6 transition-colors duration-500">
-      <div className="mb-10">
-        <Link to="/" className="text-xl font-black tracking-widest text-slate-900 dark:text-white uppercase flex items-center gap-2 italic group">
-          <span className="text-primary-red material-symbols-outlined text-3xl animate-boltFlash">bolt</span>
-          <span>HERO <span className="text-primary-red">PORTAL</span></span>
+    <aside
+      className={`hidden md:flex fixed left-0 top-0 h-screen flex-col border-r border-slate-200 dark:border-white/5 bg-white dark:bg-background-black z-[999] transition-all duration-300 overflow-visible ${isCollapsed ? 'w-20 p-4' : 'w-64 p-6'
+        }`}
+    >
+      <div className={`mb-10 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+        <Link to="/" className="text-xl font-black tracking-widest text-slate-900 dark:text-white uppercase flex items-center gap-2 italic group overflow-hidden whitespace-nowrap">
+          <span className="text-primary-red material-symbols-outlined text-3xl animate-boltFlash flex-shrink-0">bolt</span>
+          <span className={`transition-opacity duration-300 ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100'}`}>
+            HERO <span className="text-primary-red">PORTAL</span>
+          </span>
         </Link>
       </div>
+
+      <button
+        onClick={toggleSidebar}
+        className="absolute -right-3 top-9 bg-primary-red text-white p-1 rounded-full shadow-[0_0_15px_rgba(242,13,13,0.5)] hover:scale-110 transition-transform z-[1000] hidden md:flex items-center justify-center border border-white/20"
+      >
+        <span className="material-symbols-outlined text-sm">
+          {isCollapsed ? 'chevron_right' : 'chevron_left'}
+        </span>
+      </button>
 
       <button
         onClick={() => {
@@ -76,33 +90,45 @@ const Navigation: React.FC = () => {
           toggleTheme();
           soundManager.playThemeSwitch(newTheme);
         }}
-        className="group mb-8 w-full bg-slate-100 dark:bg-white/5 py-4 rounded-2xl border border-slate-200 dark:border-white/10 text-[10px] font-black uppercase flex items-center justify-between px-4 hover:scale-[1.02] active:scale-95 transition-all shadow-sm hover:shadow-lg dark:hover:shadow-primary-blue/10"
+        className={`group mb-8 w-full bg-slate-100 dark:bg-white/5 py-4 rounded-2xl border border-slate-200 dark:border-white/10 text-[10px] font-black uppercase flex items-center hover:scale-[1.02] active:scale-95 transition-all shadow-sm hover:shadow-lg dark:hover:shadow-primary-blue/10 ${isCollapsed ? 'justify-center px-0' : 'justify-between px-4'
+          }`}
       >
-        <span className="text-slate-600 dark:text-gray-400 group-hover:text-primary-blue transition-colors">
+        <span className={`text-slate-600 dark:text-gray-400 group-hover:text-primary-blue transition-all duration-300 overflow-hidden whitespace-nowrap ${isCollapsed ? 'w-0 opacity-0 hidden' : 'w-auto opacity-100'
+          }`}>
           {theme === 'dark' ? 'Multiverse Mode' : 'Prime Reality'}
         </span>
-        <span className={`material-symbols-outlined text-lg transition-all duration-700 ${theme === 'dark' ? 'rotate-[360deg] text-primary-blue' : 'rotate-0 text-primary-red'}`}>
+        <span className={`material-symbols-outlined text-lg transition-all duration-700 flex-shrink-0 ${theme === 'dark' ? 'rotate-[360deg] text-primary-blue' : 'rotate-0 text-primary-red'}`}>
           {theme === 'dark' ? 'flare' : 'shield'}
         </span>
       </button>
 
-      <nav className="flex-1 space-y-1">
-        <Link to="/" className="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-white/5 font-bold uppercase text-[11px] tracking-widest transition-all">
-          <span className="material-symbols-outlined text-xl">home</span> Front Page
+      <nav className="flex-1 space-y-2">
+        <Link to="/" className={`flex items-center gap-4 py-3 rounded-xl text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-white/5 font-bold uppercase text-[11px] tracking-widest transition-all ${isCollapsed ? 'justify-center px-0' : 'px-4'
+          }`}>
+          <span className="material-symbols-outlined text-xl flex-shrink-0">home</span>
+          <span className={`${isCollapsed ? 'hidden' : 'block'} whitespace-nowrap`}>Front Page</span>
         </Link>
-        <Link to="/trailers" className="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-white/5 font-bold uppercase text-[11px] tracking-widest transition-all">
-          <span className="material-symbols-outlined text-xl">movie</span> Trailers
+        <Link to="/trailers" className={`flex items-center gap-4 py-3 rounded-xl text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-white/5 font-bold uppercase text-[11px] tracking-widest transition-all ${isCollapsed ? 'justify-center px-0' : 'px-4'
+          }`}>
+          <span className="material-symbols-outlined text-xl flex-shrink-0">movie</span>
+          <span className={`${isCollapsed ? 'hidden' : 'block'} whitespace-nowrap`}>Trailers</span>
         </Link>
-        <Link to="/reviews" className="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-white/5 font-bold uppercase text-[11px] tracking-widest transition-all">
-          <span className="material-symbols-outlined text-xl">star</span> Reviews
+        <Link to="/reviews" className={`flex items-center gap-4 py-3 rounded-xl text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-white/5 font-bold uppercase text-[11px] tracking-widest transition-all ${isCollapsed ? 'justify-center px-0' : 'px-4'
+          }`}>
+          <span className="material-symbols-outlined text-xl flex-shrink-0">star</span>
+          <span className={`${isCollapsed ? 'hidden' : 'block'} whitespace-nowrap`}>Reviews</span>
         </Link>
-        <Link to="/blog" className="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-white/5 font-bold uppercase text-[11px] tracking-widest transition-all">
-          <span className="material-symbols-outlined text-xl">draw</span> Blog
+        <Link to="/blog" className={`flex items-center gap-4 py-3 rounded-xl text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-white/5 font-bold uppercase text-[11px] tracking-widest transition-all ${isCollapsed ? 'justify-center px-0' : 'px-4'
+          }`}>
+          <span className="material-symbols-outlined text-xl flex-shrink-0">draw</span>
+          <span className={`${isCollapsed ? 'hidden' : 'block'} whitespace-nowrap`}>Blog</span>
         </Link>
       </nav>
       <div className="pt-6 border-t border-slate-200 dark:border-white/5">
-        <Link to="/admin" className="flex items-center gap-4 px-4 py-4 rounded-xl bg-slate-900 text-white dark:bg-white/5 border border-white/10 hover:bg-primary-red transition-all font-bold uppercase text-[11px] group">
-          <span className="material-symbols-outlined group-hover:animate-boltFlash">shield</span> Admin Control
+        <Link to="/admin" className={`flex items-center gap-4 py-4 rounded-xl bg-slate-900 text-white dark:bg-white/5 border border-white/10 hover:bg-primary-red transition-all font-bold uppercase text-[11px] group ${isCollapsed ? 'justify-center px-0' : 'px-4'
+          }`}>
+          <span className="material-symbols-outlined group-hover:animate-boltFlash flex-shrink-0">shield</span>
+          <span className={`${isCollapsed ? 'hidden' : 'block'} whitespace-nowrap`}>Admin Control</span>
         </Link>
       </div>
     </aside>
@@ -127,6 +153,7 @@ const LayoutWrapper = ({ children }: { children?: React.ReactNode }) => {
   const { theme } = useContent();
   const isAdmin = location.pathname.startsWith('/admin');
   const [animating, setAnimating] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
     setAnimating(true);
@@ -141,8 +168,8 @@ const LayoutWrapper = ({ children }: { children?: React.ReactNode }) => {
           <div className="absolute top-0 bottom-0 w-2 bg-primary-red/50 shadow-[0_0_30px_#f20d0d] animate-scanWipe"></div>
         </div>
       )}
-      <Navigation />
-      <div className={`flex-1 flex flex-col min-w-0 ${!isAdmin ? 'md:pl-64' : ''}`}>
+      <Navigation isCollapsed={isCollapsed} toggleSidebar={() => setIsCollapsed(!isCollapsed)} />
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${!isAdmin ? (isCollapsed ? 'md:pl-20' : 'md:pl-64') : ''}`}>
         {!isAdmin && <Header />}
         <main className="flex-1 w-full relative">{children}</main>
         {!isAdmin && <Footer />}
@@ -150,6 +177,7 @@ const LayoutWrapper = ({ children }: { children?: React.ReactNode }) => {
     </div>
   );
 };
+
 
 
 import { supabase } from './services/supabase';
@@ -323,8 +351,7 @@ const App: React.FC = () => {
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/start" element={<Rankings />} />
-              <Route path="/comics-gen" element={<ComicsGen />} />
-              <Route path="/comics/create" element={<CreatorStudio />} />
+              <Route path="/comics" element={<Comics />} />
               <Route path="/comics/:id" element={<ComicReader />} />
               <Route path="/category/:type" element={<CategoryPage />} />
               <Route path="/news/:id" element={<NewsDetail />} />
