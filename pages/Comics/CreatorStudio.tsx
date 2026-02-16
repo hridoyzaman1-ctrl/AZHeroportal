@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useContent } from '../../App';
 import { storageService, Character, ComicEntry, ComicPage, ComicPanel } from '../../services/storage';
-import { ref, uploadString, getDownloadURL, uploadBytes } from 'firebase/storage';
+import { ref, getDownloadURL, uploadBytes } from 'firebase/storage';
 import { storage } from '../../services/firebase';
-// import { jsPDF } from 'jspdf'; // Removed unused import to fix build
+import { geminiService } from '../../services/gemini';
 
 const STYLES = [
     { id: 'marvel', name: 'Marvel Style', prompt: 'in the style of modern Marvel comic book art, vibrant colors, dynamic action, detailed shading' },
@@ -21,15 +21,18 @@ const LAYOUTS = [
     { id: '3x3', name: '3x3 Grid', panels: 9 },
 ];
 
-// Helper to generate image URL
-const generateImageUrl = (prompt: string, width = 512, height = 512) => {
+// Helper to generate image URL (now async)
+const generateImage = async (prompt: string, width = 512, height = 512) => {
     if (!prompt) return '';
     const cleanPrompt = prompt.replace(/,+/g, ',').replace(/\s+/g, ' ').trim();
-    const fullPrompt = encodeURIComponent(cleanPrompt);
-    const seed = Math.floor(Math.random() * 1000000);
-    const url = `https://image.pollinations.ai/prompt/${fullPrompt}?width=${width}&height=${height}&seed=${seed}&nologo=true`;
-    console.log("🎨 AI Imagine Request (Simplified):", url);
-    return url;
+    try {
+        const imageData = await geminiService.generateImage(cleanPrompt);
+        console.log("🎨 AI Image Generated successfully");
+        return imageData;
+    } catch (error) {
+        console.error("🎨 AI Image Generation Failed:", error);
+        throw error;
+    }
 };
 
 const CreatorStudio: React.FC = () => {
@@ -61,36 +64,50 @@ const CreatorStudio: React.FC = () => {
     const [charName, setCharName] = useState('');
     const [charDesc, setCharDesc] = useState('');
 
-    const addCharacter = () => {
+    const addCharacter = async () => {
         if (!charName || !charDesc) return;
-        const designPrompt = `Character Sheet for ${charName}: ${charDesc}, ${selectedStyle.prompt}, full body reference, neutral background`;
-        const newChar: Character = {
-            id: Date.now().toString(),
-            name: charName,
-            description: charDesc,
-            designPrompt,
-            referenceImage: generateImageUrl(designPrompt, 512, 512)
-        };
-        setCharacters([...characters, newChar]);
-        setCharName('');
-        setCharDesc('');
+        setLoading(true);
+        try {
+            const designPrompt = `Character Sheet for ${charName}: ${charDesc}, ${selectedStyle.prompt}, full body reference, neutral background`;
+            const referenceImage = await generateImage(designPrompt, 512, 512);
+            const newChar: Character = {
+                id: Date.now().toString(),
+                name: charName,
+                description: charDesc,
+                designPrompt,
+                referenceImage
+            };
+            setCharacters([...characters, newChar]);
+            setCharName('');
+            setCharDesc('');
+        } catch (error) {
+            alert("Failed to generate character design.");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const generateCover = () => {
+    const generateCover = async () => {
         setIsGeneratingCover(true);
         setCoverError(false);
-        let finalPrompt = `Comic Book Cover for "${title}": ${storyPremise}, ${coverAction}, ${selectedStyle.prompt}, detailed masterpiece, 8k resolution`;
+        try {
+            let finalPrompt = `Comic Book Cover for "${title}": ${storyPremise}, ${coverAction}, ${selectedStyle.prompt}, detailed masterpiece, 8k resolution`;
 
-        if (coverEnvironment) finalPrompt += `, setting: ${coverEnvironment}`;
+            if (coverEnvironment) finalPrompt += `, setting: ${coverEnvironment}`;
 
-        // Add character context if selected (optional implementation, for now generic)
-        if (characters.length > 0) {
-            finalPrompt += `, featuring ${characters.map(c => `${c.name} (${c.description})`).join(', ')}`;
+            // Add character context if selected (optional implementation, for now generic)
+            if (characters.length > 0) {
+                finalPrompt += `, featuring ${characters.map(c => `${c.name} (${c.description})`).join(', ')}`;
+            }
+
+            const imageData = await generateImage(finalPrompt, 512, 768);
+            console.log("🎬 Cover Generated Successfully");
+            setCoverImage(imageData);
+        } catch (error) {
+            setCoverError(true);
+        } finally {
+            setIsGeneratingCover(false);
         }
-
-        const url = generateImageUrl(finalPrompt, 512, 768);
-        console.log("🎬 Cover Prompt Generated:", finalPrompt);
-        setCoverImage(url);
     };
 
     const addPage = () => {
@@ -125,8 +142,12 @@ const CreatorStudio: React.FC = () => {
             finalPrompt += `, setting: ${pages[pageIndex].environment}`;
         }
 
-        const imageUrl = generateImageUrl(finalPrompt);
-        updatePanel(pageIndex, panelIndex, 'imageUrl', imageUrl);
+        try {
+            const imageData = await generateImage(finalPrompt);
+            updatePanel(pageIndex, panelIndex, 'imageUrl', imageData);
+        } catch (error) {
+            setPanelErrors(prev => ({ ...prev, [key]: true }));
+        }
     };
 
     const updatePageEnvironment = (pageIndex: number, env: string) => {
