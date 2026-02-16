@@ -53,26 +53,36 @@ export const geminiService = {
 
   async generateImage(prompt: string) {
     try {
-      console.log("🎨 [service] Starting image generation via Google AI Studio for prompt:", prompt);
+      console.log("🎨 [service] Starting image generation via Google AI Studio");
+      console.log("🎨 [service] Prompt:", prompt);
+      console.log("🎨 [service] API Key presence check:", !!API_KEY);
 
       const model = genAI.getGenerativeModel({
         model: "imagen-3.0-generate-001",
         safetySettings
       });
 
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
+      console.log("🎨 [service] Model initialized, calling generateContent...");
+      const result = await model.generateContent(prompt).catch(e => {
+        console.error("🎨 [service] generateContent call failed immediately:", e);
+        console.error("🎨 [service] Error details:", JSON.stringify(e, Object.getOwnPropertyNames(e), 2));
+        throw e;
+      });
 
-      console.log("🎨 [service] API Response received");
+      const response = await result.response;
+      console.log("🎨 [service] API Response received successfully");
+      console.log("🎨 [service] Raw Response:", JSON.stringify(response, null, 2));
 
       if (response.promptFeedback?.blockReason) {
         console.error("🎨 [service] Prompt blocked by safety filters:", response.promptFeedback.blockReason);
+        console.error("🎨 [service] Feedback:", JSON.stringify(response.promptFeedback, null, 2));
         throw new Error(`Generation blocked by safety filters: ${response.promptFeedback.blockReason}`);
       }
 
       const candidate = response.candidates?.[0];
       if (candidate?.finishReason && candidate.finishReason !== 'STOP') {
         console.error("🎨 [service] Generation failed to finish correctly:", candidate.finishReason);
+        console.error("🎨 [service] Candidate info:", JSON.stringify(candidate, null, 2));
         throw new Error(`Generation failed: ${candidate.finishReason}`);
       }
 
@@ -89,6 +99,7 @@ export const geminiService = {
       throw new Error("No image data found in response");
     } catch (error: any) {
       console.error("🎨 [service] Image generation error summary:", error.message || error);
+      console.error("🎨 [service] FULL ERROR OBJECT:", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
       throw error;
     }
   }
