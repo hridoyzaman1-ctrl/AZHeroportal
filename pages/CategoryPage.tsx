@@ -9,7 +9,7 @@ const CategoryPage: React.FC = () => {
   const { vaultItems, theme } = useContent();
   const [activeFilter, setActiveFilter] = useState<ContentType | 'All'>('All');
   const [visibleCount, setVisibleCount] = useState(6);
-  
+
   const filtered = useMemo(() => {
     return vaultItems
       .filter(item => {
@@ -32,11 +32,11 @@ const CategoryPage: React.FC = () => {
               {type} <span className="text-primary-blue glow-blue">HUB</span>
             </h1>
           </div>
-          
+
           <div className={`flex flex-wrap rounded-2xl p-1.5 border gap-1 ${theme === 'dark' ? 'bg-surface-dark border-white/5' : 'bg-white border-slate-200 shadow-sm'}`}>
             {contentTypes.map(ct => (
-              <button 
-                key={ct} 
+              <button
+                key={ct}
                 onClick={() => { setActiveFilter(ct); setVisibleCount(6); }}
                 className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeFilter === ct ? 'bg-primary-blue text-black shadow-lg shadow-primary-blue/30' : 'text-gray-500 hover:text-slate-900 dark:hover:text-white'}`}
               >
@@ -50,13 +50,12 @@ const CategoryPage: React.FC = () => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
               {filtered.slice(0, visibleCount).map((item) => (
-                <Link key={item.id} to={`/news/${item.id}`} className={`group border rounded-[2.5rem] overflow-hidden transition-all hover:-translate-y-2 shadow-2xl ${
-                  theme === 'dark' ? 'bg-surface-dark border-white/5 hover:border-primary-blue/30' : 'bg-white border-slate-200 hover:border-primary-blue/30 shadow-sm'
-                }`}>
+                <Link key={item.id} to={`/news/${item.id}`} className={`group border rounded-[2.5rem] overflow-hidden transition-all hover:-translate-y-2 shadow-2xl ${theme === 'dark' ? 'bg-surface-dark border-white/5 hover:border-primary-blue/30' : 'bg-white border-slate-200 hover:border-primary-blue/30 shadow-sm'
+                  }`}>
                   <div className="aspect-[16/10] relative overflow-hidden">
-                    <img src={item.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.title} />
+                    <img src={item.thumbnailUrl || item.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.title} />
                     <div className="absolute top-6 left-6">
-                       <span className="px-3 py-1.5 bg-black/60 backdrop-blur-xl text-[10px] font-black uppercase tracking-widest text-primary-blue border border-primary-blue/30 rounded-xl">{item.type}</span>
+                      <span className="px-3 py-1.5 bg-black/60 backdrop-blur-xl text-[10px] font-black uppercase tracking-widest text-primary-blue border border-primary-blue/30 rounded-xl">{item.type}</span>
                     </div>
                   </div>
                   <div className="p-8">
@@ -78,7 +77,7 @@ const CategoryPage: React.FC = () => {
             </div>
             {visibleCount < filtered.length && (
               <div className="flex justify-center mt-12 mb-20">
-                <button 
+                <button
                   onClick={() => setVisibleCount(prev => prev + 6)}
                   className="px-12 py-5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] hover:bg-primary-red hover:text-white transition-all shadow-xl active:scale-95"
                 >

@@ -300,7 +300,7 @@ const NewsDetail: React.FC = () => {
 
         <main className="max-w-5xl mx-auto py-10 px-6">
           <div className="relative aspect-video rounded-[2rem] md:rounded-[3rem] overflow-hidden mb-12 shadow-2xl border border-slate-200 dark:border-white/10 group">
-            <img src={news.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[10s]" alt="Hero" />
+            <img src={news.imageUrl || news.thumbnailUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[10s]" alt="Hero" />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent"></div>
             <div className="absolute bottom-0 p-6 md:p-10 lg:p-16 w-full">
               <div className="flex flex-wrap gap-2 mb-4">

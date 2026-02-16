@@ -86,7 +86,7 @@ const Rankings: React.FC = () => {
                   <span className="text-6xl md:text-8xl font-black italic text-primary-blue opacity-50 group-hover:opacity-100 transition-opacity">0{item.rank}</span>
                 </div>
                 <div className="lg:col-span-4 aspect-video relative rounded-3xl overflow-hidden shadow-2xl">
-                  <img src={item.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" alt="" />
+                  <img src={item.thumbnailUrl || item.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" alt="" />
                 </div>
                 <div className="lg:col-span-7 flex flex-col justify-center space-y-6">
                   <div className="flex justify-between items-start">

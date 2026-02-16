@@ -22,16 +22,15 @@ const Trailers: React.FC = () => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {trailers.slice(0, visibleCount).map((trailer) => (
-                <Link key={trailer.id} to={`/news/${trailer.id}`} className={`group relative border rounded-[2.5rem] overflow-hidden transition-all hover:-translate-y-2 shadow-xl ${
-                  theme === 'dark' ? 'bg-surface-dark border-white/5 hover:border-primary-blue/30' : 'bg-white border-slate-200 hover:border-primary-blue/30 shadow-sm'
-                }`}>
+                <Link key={trailer.id} to={`/news/${trailer.id}`} className={`group relative border rounded-[2.5rem] overflow-hidden transition-all hover:-translate-y-2 shadow-xl ${theme === 'dark' ? 'bg-surface-dark border-white/5 hover:border-primary-blue/30' : 'bg-white border-slate-200 hover:border-primary-blue/30 shadow-sm'
+                  }`}>
                   <div className="aspect-video relative overflow-hidden">
-                    <img src={trailer.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3s]" alt={trailer.title} />
+                    <img src={trailer.thumbnailUrl || trailer.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3s]" alt={trailer.title} />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <span className="material-symbols-outlined text-6xl text-primary-blue glow-blue">play_circle</span>
                     </div>
                     <div className="absolute bottom-6 left-6">
-                       <span className="px-3 py-1.5 bg-black/60 backdrop-blur-md text-[10px] font-black uppercase tracking-widest text-primary-blue border border-primary-blue/30 rounded-xl">HD Teaser</span>
+                      <span className="px-3 py-1.5 bg-black/60 backdrop-blur-md text-[10px] font-black uppercase tracking-widest text-primary-blue border border-primary-blue/30 rounded-xl">HD Teaser</span>
                     </div>
                     <div className="absolute bottom-6 right-6 text-[10px] font-black text-white/80 uppercase">{trailer.readTime}</div>
                   </div>
@@ -50,7 +49,7 @@ const Trailers: React.FC = () => {
             </div>
             {visibleCount < trailers.length && (
               <div className="flex justify-center mt-12 mb-20">
-                <button 
+                <button
                   onClick={() => setVisibleCount(prev => prev + 6)}
                   className="px-12 py-5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] hover:bg-primary-red hover:text-white transition-all shadow-xl active:scale-95"
                 >

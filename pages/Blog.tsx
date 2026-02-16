@@ -5,11 +5,11 @@ import { useContent } from '../App';
 
 const Blog: React.FC = () => {
   const { vaultItems, theme } = useContent();
-  
+
   const blogPosts = useMemo(() => {
     return vaultItems
-      .filter(item => 
-        (item.type === 'Blog' || item.categories.some(c => c.toLowerCase() === 'blog')) && 
+      .filter(item =>
+        (item.type === 'Blog' || item.categories.some(c => c.toLowerCase() === 'blog')) &&
         item.status === 'Published'
       )
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -32,7 +32,7 @@ const Blog: React.FC = () => {
             {blogPosts.slice(0, visibleCount).map((post) => (
               <Link key={post.id} to={`/news/${post.id}`} className="group grid grid-cols-1 lg:grid-cols-12 gap-10 lg:items-center">
                 <div className={`lg:col-span-7 aspect-[16/9] relative rounded-[3rem] overflow-hidden border ${theme === 'dark' ? 'border-white/5' : 'border-slate-200'}`}>
-                  <img src={post.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={post.title} />
+                  <img src={post.thumbnailUrl || post.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={post.title} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                   <div className="absolute bottom-10 left-10 flex gap-2">
                     {post.categories.slice(0, 3).map(c => (
@@ -59,7 +59,7 @@ const Blog: React.FC = () => {
             ))}
             {visibleCount < blogPosts.length && (
               <div className="flex justify-center pt-10 pb-20">
-                <button 
+                <button
                   onClick={() => setVisibleCount(prev => prev + 4)}
                   className="px-12 py-5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] hover:bg-primary-red hover:text-white transition-all shadow-xl active:scale-95"
                 >
