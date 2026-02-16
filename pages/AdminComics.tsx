@@ -8,7 +8,8 @@ const AdminComics: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
+    const [isUploadingPdf, setIsUploadingPdf] = useState(false);
+    const [isUploadingCover, setIsUploadingCover] = useState(false);
 
     // Edit Mode State
     const [editingComic, setEditingComic] = useState<ComicEntry | null>(null);
@@ -48,7 +49,7 @@ const AdminComics: React.FC = () => {
             return;
         }
 
-        setIsUploading(true);
+        setIsUploadingCover(true);
         try {
             const path = `comics/covers/${Date.now()}_${file.name}`;
             const downloadUrl = await storageService.uploadFile(file, path);
@@ -57,7 +58,7 @@ const AdminComics: React.FC = () => {
             console.error('Upload failed:', error);
             alert('Failed to upload cover image. Please try again.');
         } finally {
-            setIsUploading(false);
+            setIsUploadingCover(false);
         }
     };
 
@@ -77,7 +78,7 @@ const AdminComics: React.FC = () => {
             return;
         }
 
-        setIsUploading(true);
+        setIsUploadingPdf(true);
         try {
             // Upload to comics/timestamp_filename
             const path = `comics/${Date.now()}_${file.name}`;
@@ -87,7 +88,7 @@ const AdminComics: React.FC = () => {
             console.error('Upload failed:', error);
             alert('Failed to upload PDF. Please try again.');
         } finally {
-            setIsUploading(false);
+            setIsUploadingPdf(false);
         }
     };
 
@@ -372,10 +373,12 @@ const AdminComics: React.FC = () => {
                                             <button
                                                 type="button"
                                                 onClick={() => fileInputRef.current?.click()}
-                                                disabled={isUploading}
-                                                className="px-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 flex items-center justify-center transition-all"
+                                                disabled={isUploadingPdf}
+                                                className={`px-6 rounded-2xl border transition-all flex items-center justify-center ${isUploadingPdf ? 'bg-primary-blue/20 border-primary-blue/30' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
                                             >
-                                                <span className="material-symbols-outlined text-gray-400">upload_file</span>
+                                                <span className={`material-symbols-outlined ${isUploadingPdf ? 'text-primary-blue animate-spin' : 'text-gray-400'}`}>
+                                                    {isUploadingPdf ? 'sync' : 'upload_file'}
+                                                </span>
                                             </button>
                                             <input
                                                 type="file"
@@ -385,7 +388,8 @@ const AdminComics: React.FC = () => {
                                                 className="hidden"
                                             />
                                         </div>
-                                        {isUploading && <p className="text-[10px] text-primary-blue font-bold tracking-widest animate-pulse px-2">UPLOADING SECURE DOCUMENT...</p>}
+                                        {isUploadingPdf && <p className="text-[10px] text-primary-blue font-bold tracking-widest animate-pulse px-2">UPLOADING SECURE DOCUMENT...</p>}
+                                        {formData.pdf && !isUploadingPdf && <p className="text-[10px] text-green-500 font-bold tracking-widest px-2 flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">check_circle</span> PDF UPLINK ESTABLISHED</p>}
                                     </div>
                                     <div className="md:col-span-2 space-y-2">
                                         <label className="text-[9px] font-black uppercase text-gray-500 tracking-widest px-2">Cover Image Asset</label>
@@ -394,10 +398,12 @@ const AdminComics: React.FC = () => {
                                             <button
                                                 type="button"
                                                 onClick={() => coverInputRef.current?.click()}
-                                                disabled={isUploading}
-                                                className="px-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 flex items-center justify-center transition-all"
+                                                disabled={isUploadingCover}
+                                                className={`px-6 rounded-2xl border transition-all flex items-center justify-center ${isUploadingCover ? 'bg-primary-blue/20 border-primary-blue/30' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
                                             >
-                                                <span className="material-symbols-outlined text-gray-400">add_photo_alternate</span>
+                                                <span className={`material-symbols-outlined ${isUploadingCover ? 'text-primary-blue animate-spin' : 'text-gray-400'}`}>
+                                                    {isUploadingCover ? 'sync' : 'add_photo_alternate'}
+                                                </span>
                                             </button>
                                             <input
                                                 type="file"
@@ -407,13 +413,34 @@ const AdminComics: React.FC = () => {
                                                 className="hidden"
                                             />
                                         </div>
+
+                                        <div className="mt-4 aspect-[2/3] w-40 mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black/40 relative group/asset">
+                                            {formData.cover ? (
+                                                <>
+                                                    <img src={formData.cover} className="w-full h-full object-cover" alt="Cover Preview" />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setFormData(prev => ({ ...prev, cover: '' }))}
+                                                        className="absolute top-2 right-2 size-8 rounded-full bg-black/60 text-white flex items-center justify-center backdrop-blur-md hover:bg-red-500 transition-colors"
+                                                    >
+                                                        <span className="material-symbols-outlined text-sm">close</span>
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <div className="w-full h-full flex flex-col items-center justify-center text-gray-700 opacity-20 italic">
+                                                    <span className="material-symbols-outlined text-4xl mb-2">image</span>
+                                                    <span className="text-[8px] font-black uppercase tracking-widest">No Asset</span>
+                                                </div>
+                                            )}
+                                            {isUploadingCover && (
+                                                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center">
+                                                    <div className="size-10 border-2 border-primary-blue border-t-transparent rounded-full animate-spin mb-2"></div>
+                                                    <span className="text-[8px] font-black text-primary-blue uppercase tracking-[0.2em] animate-pulse">Uploading...</span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                                {formData.cover && (
-                                    <div className="w-32 h-44 rounded-xl overflow-hidden border border-white/10 mx-auto shadow-2xl">
-                                        <img src={formData.cover} className="w-full h-full object-cover" alt="Preview" />
-                                    </div>
-                                )}
                             </form>
                         </div>
 
@@ -422,8 +449,8 @@ const AdminComics: React.FC = () => {
                             <button
                                 type="submit"
                                 form="comicForm"
-                                disabled={isSubmitting || isUploading}
-                                className={`flex-[2] py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] text-black shadow-lg transition-all ${isSubmitting || isUploading ? 'bg-gray-600' : 'bg-primary-blue hover:scale-[1.01]'}`}
+                                disabled={isSubmitting || isUploadingPdf || isUploadingCover}
+                                className={`flex-[2] py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] text-black shadow-lg transition-all ${isSubmitting || isUploadingPdf || isUploadingCover ? 'bg-gray-600' : 'bg-primary-blue hover:scale-[1.01]'}`}
                             >
                                 {isSubmitting ? 'Processing...' : 'Commit Data'}
                             </button>
